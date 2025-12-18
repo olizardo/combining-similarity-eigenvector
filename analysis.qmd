@@ -1,0 +1,34 @@
+---
+title: "Combining Similarity and Eigenvector Analysis"
+execute: 
+  eval: true
+  echo: true
+  output: true
+  warning: false
+  message: false
+format: 
+   html:
+      code-line-numbers: true
+---
+
+```{r}
+    library(networkdata)
+    library(igraph)
+    g <- flo_marriage
+    A <- as.matrix(as_adjacency_matrix(g))
+```
+
+
+```{r}
+    jaccard.dist <- function(z) {
+        p <- z %*% z
+        q <- z %*% (1 - z) 
+        r <- t(q)
+        return(1 - (p / (p + q + r)))
+        }
+```
+
+```{r}
+    W <- jaccard.dist(A)
+    s <- eigen(W)$vectors[, 1]
+```
