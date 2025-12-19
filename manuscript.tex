@@ -31,14 +31,14 @@
 \end{abstract}
 
 \section*{Introduction}
-The standard approach to computing ``feedback'' based indices of node position in networks is due to the classic work of \citep{bonacich1972factoring-03e}. Here, the idea of feedback reduces to the more specific notion that a node's ranking in the resulting index---which can be interpreted as a ``centrality'' measure \citep{borgatti2006graph-theoretic-1a0}---is higher if it is connected to others who are themselves well connected. Thus, if the adjacency relations in the network are presented in matrix $\mathbf{A}$ with $a_{ij} = 1$ if nodes $i$ and $j$ are connected in the underlying graph, then the vector of standard Bonacich scores $\mathbf{s}$ can be obtained via the solution to the linear system:
+The standard approach to computing ``feedback'' based indices of node position in networks is due to the classic work of \citep{bonacich1972factoring-03e}. Here, the idea of feedback reduces to the more specific notion that a node's ranking in the resulting index---which can be interpreted as a ``centrality'' measure \citep{borgatti2006graph-theoretic-1a0}---is higher if it is connected to others who are themselves well connected. Thus, if the adjacency relations in the network are represented in matrix $\mathbf{A}$ with $a_{ij} = 1$ if nodes $i$ and $j$ are connected in the underlying graph, then the vector of standard Bonacich scores $\mathbf{s}$ can be obtained via the solution to the linear system:
 
 \begin{equation}
     \lambda_{1}\mathbf{s} = \mathbf{A}\mathbf{s}
     \label{eq:bon}
 \end{equation}
 
-Where $\lambda_{1}$ is the leading (usually largest) eigenvalue of the adjacency matrix, also referred to as $\rho(\mathbf{A}$, or the ``spectral radius'' of the adjacency matrix. If $\lambda_{1}$ exists, then its associated $\mathbf{s}$ eigenvector also exists, and it is guaranteed (via the famous Perron-Frobenius theorem) to be composed of real non-negative scores, which can be used to induce a ranking on the nodes of the network \citep{vigna2016spectral-19a}.
+Where $\lambda_{1}$ is the leading (largest) eigenvalue of the adjacency matrix, also referred to as $\rho(\mathbf{A})$, or the ``spectral radius'' of the adjacency matrix. If $\lambda_{1}$ exists, then its associated $\mathbf{s}$ eigenvector also exists, and it is guaranteed (via the famous Perron-Frobenius theorem) to be composed of real non-negative scores, which can be used to induce a ranking on the nodes of the network \citep{vigna2016spectral-19a}.
 
 \section*{Combining Similarity and Eigenvector Ranking}
 
@@ -59,7 +59,7 @@ Where $\mathbf{S}$ is a matrix of (local) vertex \textit{similarities} (making $
 There are many options with which to construct $\mathbf{S}$, but an attractive one is the Jaccard similarity $s^J$, because its complement $1-s^J$ returns a true metric distance (respecting the triangle inequality). In terms of the adjacency matrix, we can define the Jaccard similarity matrix as:
 
 \begin{equation}
-    \mathbf{S}^J = \frac{\mathbf{P}}{\mathbf{P}+\mathbf{Q}+\mathbf{Q}^T}
+    \mathbf{S} = \frac{\mathbf{P}}{\mathbf{P}+\mathbf{Q}+\mathbf{Q}^T}
 \end{equation}
 
 With:
@@ -75,7 +75,7 @@ With:
 
 Conceptually, the approach of \citet{alvarez-socorro2015eigencentrality-66c} is motivated by the idea that being connected to well-connected others who are also \textit{dissimilar} from you (because they are not linked to your neighbors) should matter more in determining node ranking than being connected to well-connected others who are also connected to your neighbors. Thus, theoretically, this approach merges the ``feedback'' reasoning animating the Bonacich approach with the ``brokerage'' reasoning of Burt's \citeyearpar{burt1995structural-5e8} theory of structural holes. 
 
-Algorithm~\ref{alg:ac} presents pseudocode for a simple algorithm that implements Alvarez-Socorro et al.'s approach to eigenvector-based node scoring.
+Algorithm~\ref{alg:ac} presents pseudocode for a simple algorithm that implements Alvarez-Socorro et al.'s eigenvector-based node-scoring approach.
 
 \begin{algorithm}[ht!]
 \caption{Alvarez-Socorro's et al.'s \citeyearpar{alvarez-socorro2015eigencentrality-66c} Dissimilarity Scoring}
@@ -87,7 +87,7 @@ Algorithm~\ref{alg:ac} presents pseudocode for a simple algorithm that implement
 \State $\mathbf{S} \gets \mathbf{P} \div \left(\mathbf{P}+\mathbf{Q}+\mathbf{Q}^T\right)$ \Comment{Jaccard similarity matrix}
 \State $\mathbf{D} \gets 1-\mathbf{S}$ \Comment{Jaccard distance matrix}
 \State $\mathbf{W} \gets \mathbf{A} \odot \mathbf{D}$ \Comment{element-wise product between $\mathbf{A}^\alpha$ and $\mathbf{D}$}
-\State Compute $\mathbf{s}$ \Comment {The right dominant eigenvector of $\mathbf{W}$}
+\State Compute $\mathbf{s}$ using Equation~\ref{eq:ac2} \Comment{The right dominant eigenvector of $\mathbf{W}$}
 \State \Return $\mathbf{s}$ \Comment{$n \times 1$ column vector of non-negative scores}
 \end{algorithmic}
 \end{algorithm}
@@ -95,7 +95,7 @@ Algorithm~\ref{alg:ac} presents pseudocode for a simple algorithm that implement
 \section*{A Generalized Approach}
 The \citet{alvarez-socorro2015eigencentrality-66c} approach to eigenvector scoring assumes that we want to characterize nodes as most central when their connectivity strategy combines a logic of proximity to the well-connected with a logic of brokerage. However, in some applications, the most central nodes combine a logic of proximity to the most central with \textit{closure}, that is, connecting to others who are also linked to their neighbors. 
 
-This is particularly the case in networks that feature a core-periphery or ``nested shell'' structure with a well-connected group of nodes that are also connected at the center\citep{borgatti2000models-3c1}---also referred to as the ``rich club'' phenomenon \citep{colizza2006detecting-f5a}. In this case, eigenvector scoring of the \textit{similarity} matrix $\mathbf{S}$ would make more sense and likely yield a substantively different ranking of the nodes. 
+This is particularly the case in networks that feature a core-periphery or ``nested shell'' structure with a well-connected group of nodes that are also connected at the center\citep{borgatti2000models-3c1}---also referred to as the ``rich club'' phenomenon \citep{colizza2006detecting}. In this case, eigenvector scoring of the \textit{similarity} matrix $\mathbf{S}$ would make more sense and likely yield a substantively different ranking of the nodes. 
 
 Given these competing analytic aims, it would seem appropriate to generalize Alvarez-Socorro et al.'s approach to give analysts the flexibility to specify either dissimilarity (brokerage) or similarity (closure) as the preferred criterion for eigenvector-based node ranking, or perhaps attempt to balance between the two. 
 
@@ -123,14 +123,16 @@ The pseudocode for a revised version of Algorithm~\ref{alg:ac} implementing this
 \State $\mathbf{Q} \gets \mathbf{A}(1-\mathbf{A})$ \Comment{Non-shared neighbors matrix}
 \State $\mathbf{S} \gets \mathbf{P} \div \left(\mathbf{P}+\mathbf{Q}+\mathbf{Q}^T\right)$ \Comment{Jaccard similarity matrix}
 \State $\mathbf{D} \gets 1-\mathbf{S}$ \Comment{Jaccard distance matrix}
-\State $\mathbf{W} \gets \mathbf{A} \odot \mathbf{S}^\alpha \odot \mathbf{D}^\beta$ \Comment{element-wise product between $\mathbf{A}^\alpha$ and $\mathbf{D}^\beta$}
-\State Compute $\mathbf{s}$ \Comment{The right dominant eigenvector of $\mathbf{W}$}
+\State $\mathbf{W} \gets \mathbf{A} \odot \mathbf{S}^\alpha \odot \mathbf{D}^\beta$ \Comment{element-wise product between $\mathbf{A}, \mathbf{S}^\alpha$, and $\mathbf{D}^\beta$}
+\State Compute $\mathbf{s}$ using Equation~\ref{eq:ac2} \Comment{The right dominant eigenvector of $\mathbf{W}$}
 \State \Return $\mathbf{s}$ \Comment{$n \times 1$ column vector of non-negative scores}
 \end{algorithmic}
 \end{algorithm}
 
 \section*{Example}
-To get a sense of how the generalized eigenvector similarity approach works, I analyze the oft-considered Medici marriage network---also analyzed, inter alia, by \citet{alvarez-socorro2015eigencentrality-66c}. A point and line plot of the network is shown in Figure~\ref{fig:main}. The network shows, as has been observed in myriad previous analyses of this network, the Medici at the center of a ``star'' subsection of the graph, connected to alters who are not mutually connected. We should expect, therefore, that they would fare well in a feedback central measure, such as that proposed by Alvarez-Socorro et al's \citeyearpar{alvarez-socorro2015eigencentrality-66c} in which being connected to well-connected but locally dissimilar partners counts for more (and they show that in their paper). 
+To get a sense of how the generalized eigenvector similarity approach works, I analyze the oft-considered Medici marriage network---also analyzed, inter alia, by \citet{alvarez-socorro2015eigencentrality-66c}. I construct the network by merging the marriage and business ties and linking two families if they are connected by either or both types of ties \footnote{Data were obtained from the \texttt{R} package \texttt{networkdata} \citep{schoch-network-data}.}
+
+A point and line plot of the network is shown in Figure~\ref{fig:main}. The network shows, as has been observed in myriad previous analyses of this network, the Medici at the center of a ``star'' subsection of the graph, connected to alters who are not mutually connected. We should expect, therefore, that they would fare well in a feedback central measure, such as that proposed by Alvarez-Socorro et al's \citeyearpar{alvarez-socorro2015eigencentrality-66c} in which being connected to well-connected but locally dissimilar partners counts for more (and they show that in their paper). 
 
 \begin{figure}[ht!]
     \centering
@@ -143,7 +145,7 @@ However, if we were thinking of centrality as being better indexed by being conn
 
 Table~\ref{tab:main} shows the results. The first two columns of the table show the rankings according to the standard \citet{bonacich1972factoring-03e} centrality and the \citet{alvarez-socorro2015eigencentrality-66c} scoring. All scores are normalized to fall within the zero to one range. We can see that both the Peruzzi and the Medici families emerge as most central when using the raw eigenvector scoring (with the Peruzzi slightly edging out the Medici for the top spot). However, we can see that once we adopt Alvarez-Socorro et al.'s approach, which rewards both well-connectedness \textit{and} brokerage, the Medici emerge as the undisputed most central actors in the network, consistent with Padgett and Ansell's \citeyearpar{padgett1993robust-4cc} which relied on betweenness. The Peruzzi, scored as the most central in the standard eigenvector scoring, drop to fourth place. 
 
-The last two columns of the table show the scoring obtained from Equation~\ref{eq:gen}, first using $\alpha = 1$ and $\beta = 0$ (giving all weight to being connected to well-connected others who are also adjacent to your other neighbors), and $\alpha = 0.25$ and $\beta = 0.75$ (a ``hybrid'' ranking giving most of the weight to being connected to well-connected but dissimilar others). From the similarity-based scoring, we can see that the Peruzzi are the undisputed most central actors in the network, while the Medici are fairly peripheral. The other top actors, according to this scoring, all belong to the well-connected core actors revolving around the Peruzzi in the right-hand of Figure~\ref{fig:main}.
+The last two columns of the table show the scoring obtained from Equation~\ref{eq:gen}, first using $\alpha = 1$ and $\beta = 0$ (giving all weight to being connected to well-connected others who are also adjacent to your other neighbors), and $\alpha = 0.25$ and $\beta = 0.75$ (a ``hybrid'' ranking giving most of the weight to being connected to well-connected but dissimilar others). From the similarity-based scoring, we can see that the Peruzzi are the undisputed most central actors in the network, while the Medici are fairly peripheral. The other top actors, according to this scoring, all belong to the well-connected core actors revolving around the Peruzzi in the right-hand of Figure~\ref{fig:main}. We can also see that the ``hybrid'' approach, even though it gives more weight to dissimilarities than to similarities, is still dominated by the similarity-based ranking. We observe some reshuffling of the order in column eight compared to column six, but overall, the same substantive story is told (the Peruzzi and their satellites are the top actors). 
 
 \input{main}
 
