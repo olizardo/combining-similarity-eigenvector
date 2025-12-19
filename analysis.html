@@ -142,7 +142,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>    <span class="fu">library</span>(networkdata)</span>
 <span id="cb1-2"><a href="#cb1-2"></a>    <span class="fu">library</span>(igraph)</span>
 <span id="cb1-3"><a href="#cb1-3"></a>    g <span class="ot">&lt;-</span> flo_marriage <span class="sc">+</span> flo_business</span>
-<span id="cb1-4"><a href="#cb1-4"></a>    g <span class="ot">&lt;-</span> <span class="fu">subgraph</span>(g, <span class="fu">which</span>(<span class="fu">degree</span>(g) <span class="sc">!=</span> <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4"></a>    g <span class="ot">&lt;-</span> <span class="fu">subgraph</span>(g, <span class="fu">which</span>(<span class="fu">degree</span>(g) <span class="sc">&gt;</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>    <span class="fu">set.seed</span>(<span class="dv">345</span>)</span>
@@ -169,31 +169,36 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb4-8"><a href="#cb4-8"></a>      s <span class="ot">&lt;-</span> <span class="fu">abs</span>(<span class="fu">eigen</span>(W)<span class="sc">$</span>vectors[, <span class="dv">1</span>])</span>
 <span id="cb4-9"><a href="#cb4-9"></a>      <span class="fu">names</span>(s) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(A)</span>
 <span id="cb4-10"><a href="#cb4-10"></a>      s <span class="ot">&lt;-</span> (s <span class="sc">-</span> <span class="fu">min</span>(s))<span class="sc">/</span>(<span class="fu">max</span>(s) <span class="sc">-</span> <span class="fu">min</span>(s))</span>
-<span id="cb4-11"><a href="#cb4-11"></a>      <span class="fu">return</span>(s)</span>
+<span id="cb4-11"><a href="#cb4-11"></a>      <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">s =</span> s, <span class="at">D =</span> D, <span class="at">S =</span> S, <span class="at">W =</span> W))</span>
 <span id="cb4-12"><a href="#cb4-12"></a>   }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>    bon <span class="ot">&lt;-</span> <span class="fu">prestige.sim</span>(g, <span class="at">alpha =</span> <span class="dv">0</span>, <span class="at">beta =</span> <span class="dv">0</span>)</span>
-<span id="cb5-2"><a href="#cb5-2"></a>    ace <span class="ot">&lt;-</span> <span class="fu">prestige.sim</span>(g, <span class="at">alpha =</span> <span class="dv">0</span>, <span class="at">beta =</span> <span class="dv">1</span>)</span>
-<span id="cb5-3"><a href="#cb5-3"></a>    ol1 <span class="ot">&lt;-</span> <span class="fu">prestige.sim</span>(g, <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">beta =</span> <span class="dv">0</span>)</span>
-<span id="cb5-4"><a href="#cb5-4"></a>    ol2 <span class="ot">&lt;-</span> <span class="fu">prestige.sim</span>(g, <span class="at">alpha =</span> <span class="fl">0.1</span>, <span class="at">beta =</span> <span class="fl">0.9</span>)</span>
-<span id="cb5-5"><a href="#cb5-5"></a>    sort.vec <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb5-6"><a href="#cb5-6"></a>        x <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Node =</span> <span class="fu">names</span>(x), <span class="at">Score =</span> <span class="fu">as.numeric</span>(x))</span>
-<span id="cb5-7"><a href="#cb5-7"></a>        x <span class="ot">&lt;-</span> x[<span class="fu">order</span>(x<span class="sc">$</span>Score, <span class="at">decreasing =</span> <span class="cn">TRUE</span>), ]</span>
-<span id="cb5-8"><a href="#cb5-8"></a>        <span class="fu">return</span>(x)</span>
-<span id="cb5-9"><a href="#cb5-9"></a>        }</span>
-<span id="cb5-10"><a href="#cb5-10"></a>    eig.dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">sort.vec</span>(bon), <span class="fu">sort.vec</span>(ace), <span class="fu">sort.vec</span>(ol1), <span class="fu">sort.vec</span>(ol2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>    res <span class="ot">&lt;-</span> <span class="fu">prestige.sim</span>(g, <span class="at">alpha =</span> <span class="fl">0.25</span>, <span class="at">beta =</span> <span class="fl">0.25</span>)</span>
+<span id="cb5-2"><a href="#cb5-2"></a>    <span class="fu">plot</span>(<span class="fu">as.vector</span>(res<span class="sc">$</span>W))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="analysis_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>    <span class="fu">library</span>(kableExtra)</span>
-<span id="cb6-2"><a href="#cb6-2"></a>    <span class="fu">library</span>(here)</span>
-<span id="cb6-3"><a href="#cb6-3"></a>    <span class="fu">kbl</span>(eig.dat,</span>
-<span id="cb6-4"><a href="#cb6-4"></a>        <span class="at">format =</span> <span class="st">"html"</span>,</span>
-<span id="cb6-5"><a href="#cb6-5"></a>        <span class="at">row.names =</span> <span class="cn">FALSE</span>, <span class="at">align =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"l"</span>, <span class="st">"c"</span>), <span class="dv">4</span>),</span>
-<span id="cb6-6"><a href="#cb6-6"></a>        <span class="at">digits =</span> <span class="dv">3</span>, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Node"</span>, <span class="st">"Eig."</span>, <span class="st">"Node"</span>, <span class="st">"Eig./Dis"</span>, <span class="st">"Node"</span>, <span class="st">"Eig./Sim"</span>, <span class="st">"Node"</span>, <span class="st">"Eig./Both"</span>),</span>
-<span id="cb6-7"><a href="#cb6-7"></a>        <span class="at">caption =</span> <span class="st">"Eigenvector-Based Scores for the Medici Network."</span>, <span class="at">label =</span> <span class="st">"tab:main"</span>) <span class="sc">%&gt;%</span>    </span>
-<span id="cb6-8"><a href="#cb6-8"></a>        <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> </span>
-<span id="cb6-9"><a href="#cb6-9"></a>                    <span class="fu">c</span>(<span class="st">"hover"</span>, <span class="st">"condensed"</span>, <span class="st">"responsive"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>    bon <span class="ot">&lt;-</span> <span class="fu">prestige.sim</span>(g, <span class="at">alpha =</span> <span class="dv">0</span>, <span class="at">beta =</span> <span class="dv">0</span>)</span>
+<span id="cb6-2"><a href="#cb6-2"></a>    ace <span class="ot">&lt;-</span> <span class="fu">prestige.sim</span>(g, <span class="at">alpha =</span> <span class="dv">0</span>, <span class="at">beta =</span> <span class="dv">1</span>)</span>
+<span id="cb6-3"><a href="#cb6-3"></a>    ol1 <span class="ot">&lt;-</span> <span class="fu">prestige.sim</span>(g, <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">beta =</span> <span class="dv">0</span>)</span>
+<span id="cb6-4"><a href="#cb6-4"></a>    ol2 <span class="ot">&lt;-</span> <span class="fu">prestige.sim</span>(g, <span class="at">alpha =</span> <span class="fl">0.15</span>, <span class="at">beta =</span> <span class="fl">0.85</span>)</span>
+<span id="cb6-5"><a href="#cb6-5"></a>    sort.vec <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb6-6"><a href="#cb6-6"></a>        x <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Node =</span> <span class="fu">names</span>(x), <span class="at">Score =</span> <span class="fu">as.numeric</span>(x))</span>
+<span id="cb6-7"><a href="#cb6-7"></a>        x <span class="ot">&lt;-</span> x[<span class="fu">order</span>(x<span class="sc">$</span>Score, <span class="at">decreasing =</span> <span class="cn">TRUE</span>), ]</span>
+<span id="cb6-8"><a href="#cb6-8"></a>        <span class="fu">return</span>(x)</span>
+<span id="cb6-9"><a href="#cb6-9"></a>        }</span>
+<span id="cb6-10"><a href="#cb6-10"></a>    eig.dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">sort.vec</span>(bon<span class="sc">$</span>s), <span class="fu">sort.vec</span>(ace<span class="sc">$</span>s), <span class="fu">sort.vec</span>(ol1<span class="sc">$</span>s), <span class="fu">sort.vec</span>(ol2<span class="sc">$</span>s))</span>
+<span id="cb6-11"><a href="#cb6-11"></a>    <span class="fu">library</span>(kableExtra)</span>
+<span id="cb6-12"><a href="#cb6-12"></a>    <span class="fu">library</span>(here)</span>
+<span id="cb6-13"><a href="#cb6-13"></a>    <span class="fu">kbl</span>(eig.dat,</span>
+<span id="cb6-14"><a href="#cb6-14"></a>        <span class="at">format =</span> <span class="st">"html"</span>,</span>
+<span id="cb6-15"><a href="#cb6-15"></a>        <span class="at">row.names =</span> <span class="cn">FALSE</span>, <span class="at">align =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"l"</span>, <span class="st">"c"</span>), <span class="dv">4</span>),</span>
+<span id="cb6-16"><a href="#cb6-16"></a>        <span class="at">digits =</span> <span class="dv">3</span>, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Node"</span>, <span class="st">"Eig."</span>, <span class="st">"Node"</span>, <span class="st">"Eig./Dis"</span>, <span class="st">"Node"</span>, <span class="st">"Eig./Sim"</span>, <span class="st">"Node"</span>, <span class="st">"Eig./Both"</span>),</span>
+<span id="cb6-17"><a href="#cb6-17"></a>        <span class="at">caption =</span> <span class="st">"Eigenvector-Based Scores for the Medici Network."</span>, <span class="at">label =</span> <span class="st">"tab:main"</span>) <span class="sc">%&gt;%</span>    </span>
+<span id="cb6-18"><a href="#cb6-18"></a>        <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> </span>
+<span id="cb6-19"><a href="#cb6-19"></a>                    <span class="fu">c</span>(<span class="st">"hover"</span>, <span class="st">"condensed"</span>, <span class="st">"responsive"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 
 <table class="table table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
@@ -223,142 +228,132 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </tr>
   <tr>
    <td style="text-align:left;"> Medici </td>
-   <td style="text-align:center;"> 0.941 </td>
+   <td style="text-align:center;"> 0.783 </td>
    <td style="text-align:left;"> Barbadori </td>
-   <td style="text-align:center;"> 0.534 </td>
+   <td style="text-align:center;"> 0.641 </td>
    <td style="text-align:left;"> Castellani </td>
-   <td style="text-align:center;"> 0.754 </td>
+   <td style="text-align:center;"> 0.752 </td>
    <td style="text-align:left;"> Barbadori </td>
-   <td style="text-align:center;"> 0.959 </td>
+   <td style="text-align:center;"> 0.809 </td>
   </tr>
   <tr>
+   <td style="text-align:left;"> Castellani </td>
+   <td style="text-align:center;"> 0.779 </td>
+   <td style="text-align:left;"> Peruzzi </td>
+   <td style="text-align:center;"> 0.556 </td>
+   <td style="text-align:left;"> Lamberteschi </td>
+   <td style="text-align:center;"> 0.679 </td>
    <td style="text-align:left;"> Castellani </td>
    <td style="text-align:center;"> 0.794 </td>
-   <td style="text-align:left;"> Guadagni </td>
-   <td style="text-align:center;"> 0.405 </td>
+  </tr>
+  <tr>
    <td style="text-align:left;"> Lamberteschi </td>
-   <td style="text-align:center;"> 0.682 </td>
+   <td style="text-align:center;"> 0.744 </td>
+   <td style="text-align:left;"> Guadagni </td>
+   <td style="text-align:center;"> 0.538 </td>
+   <td style="text-align:left;"> Bischeri </td>
+   <td style="text-align:center;"> 0.652 </td>
+   <td style="text-align:left;"> Lamberteschi </td>
+   <td style="text-align:center;"> 0.720 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Bischeri </td>
+   <td style="text-align:center;"> 0.729 </td>
+   <td style="text-align:left;"> Strozzi </td>
+   <td style="text-align:center;"> 0.491 </td>
+   <td style="text-align:left;"> Strozzi </td>
+   <td style="text-align:center;"> 0.514 </td>
    <td style="text-align:left;"> Medici </td>
-   <td style="text-align:center;"> 0.955 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Barbadori </td>
-   <td style="text-align:center;"> 0.775 </td>
-   <td style="text-align:left;"> Peruzzi </td>
-   <td style="text-align:center;"> 0.389 </td>
-   <td style="text-align:left;"> Bischeri </td>
-   <td style="text-align:center;"> 0.655 </td>
-   <td style="text-align:left;"> Castellani </td>
-   <td style="text-align:center;"> 0.871 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Lamberteschi </td>
-   <td style="text-align:center;"> 0.754 </td>
-   <td style="text-align:left;"> Tornabuoni </td>
-   <td style="text-align:center;"> 0.385 </td>
-   <td style="text-align:left;"> Strozzi </td>
-   <td style="text-align:center;"> 0.518 </td>
-   <td style="text-align:left;"> Lamberteschi </td>
-   <td style="text-align:center;"> 0.792 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Bischeri </td>
-   <td style="text-align:center;"> 0.740 </td>
-   <td style="text-align:left;"> Albizzi </td>
-   <td style="text-align:center;"> 0.374 </td>
-   <td style="text-align:left;"> Barbadori </td>
-   <td style="text-align:center;"> 0.263 </td>
-   <td style="text-align:left;"> Bischeri </td>
-   <td style="text-align:center;"> 0.754 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Strozzi </td>
-   <td style="text-align:center;"> 0.722 </td>
-   <td style="text-align:left;"> Ridolfi </td>
-   <td style="text-align:center;"> 0.370 </td>
-   <td style="text-align:left;"> Guadagni </td>
-   <td style="text-align:center;"> 0.203 </td>
-   <td style="text-align:left;"> Strozzi </td>
    <td style="text-align:center;"> 0.701 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Guadagni </td>
-   <td style="text-align:center;"> 0.555 </td>
+   <td style="text-align:left;"> Barbadori </td>
+   <td style="text-align:center;"> 0.717 </td>
+   <td style="text-align:left;"> Castellani </td>
+   <td style="text-align:center;"> 0.448 </td>
+   <td style="text-align:left;"> Barbadori </td>
+   <td style="text-align:center;"> 0.259 </td>
+   <td style="text-align:left;"> Bischeri </td>
+   <td style="text-align:center;"> 0.674 </td>
+  </tr>
+  <tr>
    <td style="text-align:left;"> Strozzi </td>
-   <td style="text-align:center;"> 0.344 </td>
+   <td style="text-align:center;"> 0.702 </td>
+   <td style="text-align:left;"> Tornabuoni </td>
+   <td style="text-align:center;"> 0.438 </td>
+   <td style="text-align:left;"> Guadagni </td>
+   <td style="text-align:center;"> 0.197 </td>
+   <td style="text-align:left;"> Strozzi </td>
+   <td style="text-align:center;"> 0.581 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Guadagni </td>
+   <td style="text-align:center;"> 0.513 </td>
+   <td style="text-align:left;"> Bischeri </td>
+   <td style="text-align:center;"> 0.437 </td>
    <td style="text-align:left;"> Ginori </td>
-   <td style="text-align:center;"> 0.061 </td>
+   <td style="text-align:center;"> 0.058 </td>
    <td style="text-align:left;"> Ginori </td>
-   <td style="text-align:center;"> 0.633 </td>
+   <td style="text-align:center;"> 0.357 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Ginori </td>
-   <td style="text-align:center;"> 0.438 </td>
-   <td style="text-align:left;"> Ginori </td>
-   <td style="text-align:center;"> 0.326 </td>
+   <td style="text-align:center;"> 0.349 </td>
+   <td style="text-align:left;"> Lamberteschi </td>
+   <td style="text-align:center;"> 0.427 </td>
    <td style="text-align:left;"> Medici </td>
    <td style="text-align:center;"> 0.045 </td>
-   <td style="text-align:left;"> Albizzi </td>
-   <td style="text-align:center;"> 0.437 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Ridolfi </td>
-   <td style="text-align:center;"> 0.424 </td>
-   <td style="text-align:left;"> Castellani </td>
-   <td style="text-align:center;"> 0.309 </td>
-   <td style="text-align:left;"> Albizzi </td>
-   <td style="text-align:center;"> 0.018 </td>
    <td style="text-align:left;"> Guadagni </td>
-   <td style="text-align:center;"> 0.428 </td>
+   <td style="text-align:center;"> 0.199 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Ridolfi </td>
+   <td style="text-align:center;"> 0.345 </td>
+   <td style="text-align:left;"> Ridolfi </td>
+   <td style="text-align:center;"> 0.427 </td>
+   <td style="text-align:left;"> Albizzi </td>
+   <td style="text-align:center;"> 0.012 </td>
+   <td style="text-align:left;"> Albizzi </td>
+   <td style="text-align:center;"> 0.104 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Albizzi </td>
-   <td style="text-align:center;"> 0.395 </td>
-   <td style="text-align:left;"> Bischeri </td>
-   <td style="text-align:center;"> 0.288 </td>
-   <td style="text-align:left;"> Pazzi </td>
-   <td style="text-align:center;"> 0.008 </td>
+   <td style="text-align:center;"> 0.308 </td>
+   <td style="text-align:left;"> Albizzi </td>
+   <td style="text-align:center;"> 0.419 </td>
+   <td style="text-align:left;"> Salviati </td>
+   <td style="text-align:center;"> 0.003 </td>
    <td style="text-align:left;"> Ridolfi </td>
-   <td style="text-align:center;"> 0.364 </td>
+   <td style="text-align:center;"> 0.009 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Tornabuoni </td>
-   <td style="text-align:center;"> 0.391 </td>
-   <td style="text-align:left;"> Lamberteschi </td>
-   <td style="text-align:center;"> 0.280 </td>
-   <td style="text-align:left;"> Salviati </td>
-   <td style="text-align:center;"> 0.008 </td>
-   <td style="text-align:left;"> Tornabuoni </td>
-   <td style="text-align:center;"> 0.364 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Salviati </td>
-   <td style="text-align:center;"> 0.100 </td>
+   <td style="text-align:center;"> 0.307 </td>
+   <td style="text-align:left;"> Ginori </td>
+   <td style="text-align:center;"> 0.348 </td>
    <td style="text-align:left;"> Pazzi </td>
-   <td style="text-align:center;"> 0.044 </td>
+   <td style="text-align:center;"> 0.003 </td>
+   <td style="text-align:left;"> Tornabuoni </td>
+   <td style="text-align:center;"> 0.009 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Pazzi </td>
+   <td style="text-align:center;"> 0.000 </td>
+   <td style="text-align:left;"> Pazzi </td>
+   <td style="text-align:center;"> 0.000 </td>
    <td style="text-align:left;"> Ridolfi </td>
-   <td style="text-align:center;"> 0.006 </td>
+   <td style="text-align:center;"> 0.000 </td>
    <td style="text-align:left;"> Pazzi </td>
-   <td style="text-align:center;"> 0.350 </td>
+   <td style="text-align:center;"> 0.000 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Pazzi </td>
-   <td style="text-align:center;"> 0.100 </td>
    <td style="text-align:left;"> Salviati </td>
-   <td style="text-align:center;"> 0.044 </td>
+   <td style="text-align:center;"> 0.000 </td>
+   <td style="text-align:left;"> Salviati </td>
+   <td style="text-align:center;"> 0.000 </td>
    <td style="text-align:left;"> Tornabuoni </td>
-   <td style="text-align:center;"> 0.006 </td>
+   <td style="text-align:center;"> 0.000 </td>
    <td style="text-align:left;"> Salviati </td>
-   <td style="text-align:center;"> 0.350 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Acciaiuoli </td>
-   <td style="text-align:center;"> 0.000 </td>
-   <td style="text-align:left;"> Acciaiuoli </td>
-   <td style="text-align:center;"> 0.000 </td>
-   <td style="text-align:left;"> Acciaiuoli </td>
-   <td style="text-align:center;"> 0.000 </td>
-   <td style="text-align:left;"> Acciaiuoli </td>
    <td style="text-align:center;"> 0.000 </td>
   </tr>
 </tbody>
@@ -374,7 +369,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb7-5"><a href="#cb7-5"></a>            <span class="at">digits =</span> <span class="dv">3</span>, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Node"</span>, <span class="st">"Eig."</span>, <span class="st">"Node"</span>, <span class="st">"Eig./Dis"</span>, <span class="st">"Node"</span>, <span class="st">"Eig./Sim"</span>, <span class="st">"Node"</span>, <span class="st">"Eig./Both"</span>),</span>
 <span id="cb7-6"><a href="#cb7-6"></a>            <span class="at">caption =</span> <span class="st">"Eigenvector-Based Scores for the Medici Network."</span>, <span class="at">label =</span> <span class="st">"tab:main"</span>) <span class="sc">%&gt;%</span>    </span>
 <span id="cb7-7"><a href="#cb7-7"></a>            <span class="fu">kable_styling</span>(<span class="at">latex_options =</span> <span class="fu">c</span>(<span class="st">"scale_down"</span>)),</span>
-<span id="cb7-8"><a href="#cb7-8"></a>        <span class="at">file =</span> <span class="fu">here</span>(<span class="st">"main.tex"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-8"><a href="#cb7-8"></a>        <span class="at">file =</span> <span class="fu">here</span>(<span class="st">"main.tex"</span>)</span>
+<span id="cb7-9"><a href="#cb7-9"></a>        )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>    dist.diff <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb8-2"><a href="#cb8-2"></a>        x <span class="ot">&lt;-</span> x <span class="sc">*</span> (<span class="dv">1</span><span class="sc">-</span>x)</span>
+<span id="cb8-3"><a href="#cb8-3"></a>        <span class="fu">return</span>(x)</span>
+<span id="cb8-4"><a href="#cb8-4"></a>        }</span>
+<span id="cb8-5"><a href="#cb8-5"></a>    b <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, .<span class="dv">01</span>), dist.diff)</span>
+<span id="cb8-6"><a href="#cb8-6"></a>    <span class="fu">plot</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="analysis_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
 </div>
 
 </main>
