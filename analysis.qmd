@@ -18,6 +18,17 @@ format:
     g <- subgraph(g, which(degree(g) != 0))
 ```
 
+```{r}
+    set.seed(345)
+    png("medici.png", width = 800, height = 600)
+    plot(g, 
+        vertex.size=8, vertex.frame.color="lightgray", 
+        vertex.label.dist=2, edge.curved=0.2, 
+        vertex.label.cex = 1, edge.color = "gray",
+        edge.width = 2)
+    dev.off()
+```
+
 
 ```{r}
    prestige.sim <- function(x, alpha = 0, beta = 0) {
@@ -43,7 +54,6 @@ format:
         x <- x[order(x$Score, decreasing = TRUE), ]
         return(x)
         }
-    
 ```
 
 
