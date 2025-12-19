@@ -104,13 +104,13 @@ Given these competing analytic aims, it would seem appropriate to generalize Alv
 One option would be to modify Equation~\ref{eq:ac1} as follows:
 
 \begin{equation}
-    \mathbf{W} = \mathbf{A} \odot \mathbf{S}^\alpha \odot (1 - \mathbf{S})^\beta
+    \mathbf{W} = \mathbf{A} \odot \left[\mathbf{S}^\alpha \odot (1 - \mathbf{S})^\beta\right]
     \label{eq:gen}
 \end{equation}
 
 With the restriction that $0 \geq \delta \leq 1$ and $0 \geq \gamma \leq 1$.
 
-When $\alpha = \beta = 0$, then  $\mathbf{W} = \mathbf{A}$ and we recover the standard Eigenvector scores given by Equation~\ref{eq:bon}. When $\alpha = 0$ and $\beta = 1$, then $\mathbf{W} = \mathbf{A} \odot (1 - \mathbf{S})$, which is the same as Equation~\ref{eq:ac1}, and when apply Equation~\ref{eq:ac2}, we recover the dissimilarity-weighted eigenvector scores of \citet{alvarez-socorro2015eigencentrality-66c}. When $\alpha = 1$ and $\beta = 0$, then $\mathbf{W} = \mathbf{A} \odot \mathbf{S}$, and when we apply Equation~\ref{eq:ac2}, we recover scores that weigh the ranking by the focal node's \textit{similarity} rather than dissimilarity to well-connected neighbors based on local neighborhood overlap. Finally, when $\alpha > 0$ \textit{and} $\beta > 0$ then $\mathbf{W}$ is given by Equation~\ref{eq:gen}, and when we apply Equation~\ref{eq:ac2}, we recover a compromise ranking that takes both brokerage and closure into account. 
+When $\alpha = \beta = 0$, then  $\mathbf{W} = \mathbf{A}$ and we recover the standard Eigenvector scores given by Equation~\ref{eq:bon}. When $\alpha = 0$ and $\beta = 1$, then $\mathbf{W} = \mathbf{A} \odot (1 - \mathbf{S})$, which is the same as Equation~\ref{eq:ac1}, and when apply Equation~\ref{eq:ac2}, we recover the dissimilarity-weighted eigenvector scores of \citet{alvarez-socorro2015eigencentrality-66c}. When $\alpha = 1$ and $\beta = 0$, then $\mathbf{W} = \mathbf{A} \odot \mathbf{S}$, and when we apply Equation~\ref{eq:ac2}, we recover scores that weigh the ranking by the focal node's \textit{similarity} rather than dissimilarity to well-connected neighbors based on local neighborhood overlap. Finally, when $\alpha = 1$ \textit{and} $\beta = 1$ then $\mathbf{W} = \mathbf{A} \odot \left[\mathbf{S} \odot (1-\mathbf{S})\right]$, and when we apply Equation~\ref{eq:ac2}, we recover a compromise ranking that takes both brokerage and closure relative to well-connected neighbors into account. 
 
 The pseudocode for a revised version of Algorithm~\ref{alg:ac} implementing this idea is shown as Algorithm~\ref{alg:ol}.
 
@@ -123,9 +123,12 @@ The pseudocode for a revised version of Algorithm~\ref{alg:ac} implementing this
 \Ensure $0 \geq \alpha \leq 1$
 \State $\mathbf{P} \gets \mathbf{A}^2$ \Comment{Common neighbors matrix}
 \State $\mathbf{Q} \gets \mathbf{A}(1-\mathbf{A})$ \Comment{Non-shared neighbors matrix}
-\State $\mathbf{S} \gets \mathbf{P} \div \left(\mathbf{P}+\mathbf{Q}+\mathbf{Q}^T\right)$ \Comment{Jaccard similarity matrix}
+\State $\mathbf{S} \gets  \mathbf{P} \div \left(\mathbf{P}+\mathbf{Q}+\mathbf{Q}^T\right)$ \Comment{Jaccard similarity matrix}
+\State $\mathbf{S} \gets \mathbf{S} \div max(\mathbf{S})$ \Comment{Normalizing similarity matrix by maximum}
 \State $\mathbf{D} \gets 1-\mathbf{S}$ \Comment{Jaccard distance matrix}
-\State $\mathbf{W} \gets \mathbf{A} \odot \mathbf{S}^\alpha \odot \mathbf{D}^\beta$ \Comment{element-wise product between $\mathbf{A}, \mathbf{S}^\alpha$, and $\mathbf{D}^\beta$}
+\State $\mathbf{D} \gets \mathbf{D} \div max(\mathbf{D})$ \Comment{Normalizing distance matrix by maximum}
+\State $\mathbf{Z} \gets \mathbf{S}^\alpha \odot \mathbf{D}^\beta$ \Comment{Element-wise product of $\mathbf{S}^\alpha$ and $\mathbf{D}^\beta$}
+\State $\mathbf{W} \gets \mathbf{A} \odot \mathbf{Z}$ \Comment{element-wise product between $\mathbf{A}$ and $\mathbf{Z}$}
 \State Compute $\mathbf{s}$ using Equation~\ref{eq:ac2} \Comment{The right dominant eigenvector of $\mathbf{W}$}
 \State \Return $\mathbf{s}$ \Comment{$n \times 1$ column vector of non-negative scores}
 \end{algorithmic}
