@@ -15,8 +15,9 @@ format:
     library(networkdata)
     library(igraph)
     g <- flo_marriage + flo_business
-    g <- subgraph(g, which(degree(g) != 0))
+    g <- subgraph(g, which(degree(g) > 1))
 ```
+
 
 ```{r}
     set.seed(345)
@@ -41,25 +42,26 @@ format:
       s <- abs(eigen(W)$vectors[, 1])
       names(s) <- rownames(A)
       s <- (s - min(s))/(max(s) - min(s))
-      return(s)
+      return(list(s = s, D = D, S = S, W = W))
    }
 ```
 
+```{r}
+    res <- prestige.sim(g, alpha = 0.25, beta = 0.25)
+    plot(as.vector(res$W))
+```
 
 ```{r}
     bon <- prestige.sim(g, alpha = 0, beta = 0)
     ace <- prestige.sim(g, alpha = 0, beta = 1)
     ol1 <- prestige.sim(g, alpha = 1, beta = 0)
-    ol2 <- prestige.sim(g, alpha = 0.1, beta = 0.9)
+    ol2 <- prestige.sim(g, alpha = 0.15, beta = 0.85)
     sort.vec <- function(x) {
         x <- data.frame(Node = names(x), Score = as.numeric(x))
         x <- x[order(x$Score, decreasing = TRUE), ]
         return(x)
         }
-    eig.dat <- data.frame(sort.vec(bon), sort.vec(ace), sort.vec(ol1), sort.vec(ol2))
-```
-
-```{r}
+    eig.dat <- data.frame(sort.vec(bon$s), sort.vec(ace$s), sort.vec(ol1$s), sort.vec(ol2$s))
     library(kableExtra)
     library(here)
     kbl(eig.dat,
@@ -79,6 +81,16 @@ format:
             digits = 3, col.names = c("Node", "Eig.", "Node", "Eig./Dis", "Node", "Eig./Sim", "Node", "Eig./Both"),
             caption = "Eigenvector-Based Scores for the Medici Network.", label = "tab:main") %>%    
             kable_styling(latex_options = c("scale_down")),
-        file = here("main.tex"))
+        file = here("main.tex")
+        )
 ```
 
+
+```{r}
+    dist.diff <- function(x) {
+        x <- x * (1-x)
+        return(x)
+        }
+    b <- sapply(seq(0, 1, .01), dist.diff)
+    plot(b)
+```
