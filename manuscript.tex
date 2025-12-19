@@ -81,20 +81,19 @@ Algorithm~\ref{alg:ac} presents pseudocode for a simple algorithm that implement
 \caption{Alvarez-Socorro's et al.'s \citeyearpar{alvarez-socorro2015eigencentrality-66c} Dissimilarity Scoring}
 \label{alg:ac}
 \begin{algorithmic}[1]
-\State \textbf{Input}: $\mathbf{A}$ \Comment{$n \times n$ symmetric adjacency matrix}
+\Require $\mathbf{A}$ \Comment{$n \times n$ symmetric adjacency matrix}
 \State $\mathbf{P} \gets \mathbf{A}^2$ \Comment{Common neighbors matrix}
 \State $\mathbf{Q} \gets \mathbf{A}(1-\mathbf{A})$ \Comment{Non-shared neighbors matrix}
 \State $\mathbf{S} \gets \mathbf{P} \div \left(\mathbf{P}+\mathbf{Q}+\mathbf{Q}^T\right)$ \Comment{Jaccard similarity matrix}
 \State $\mathbf{D} \gets 1-\mathbf{S}$ \Comment{Jaccard distance matrix}
-\State $\mathbf{W} \gets \mathbf{A} \odot \mathbf{D}$ \Comment{element-wise product between $\mathbf{A}$ and $\mathbf{D}$}
-\State Compute $\mathbf{s}$, the left dominant eigenvector of $\mathbf{W}$
-\State \textbf{Output}: \Comment{$n \times 1$ column vector of non-negative scores}
-\State \Return $\mathbf{s}$
+\State $\mathbf{W} \gets \mathbf{A} \odot \mathbf{D}$ \Comment{element-wise product between $\mathbf{A}^\alpha$ and $\mathbf{D}$}
+\State Compute $\mathbf{s}$ \Comment {The left dominant eigenvector of $\mathbf{W}$}
+\State \Return $\mathbf{s}$ \Comment{$n \times 1$ column vector of non-negative scores}
 \end{algorithmic}
 \end{algorithm}
 
 \section*{A Generalized Approach}
-The \citet{alvarez-socorro2015eigencentrality-66c} approach to eigenvector scoring relies on the assumption that we want to characterize nodes as most central when their connectivity strategy combines a logic of proximity to the well-connected with a logic of brokerage. However, in some applications, the most central nodes combine a logic of proximity to the most central with \textit{closure}, that is, connecting to others who are also linked to their neighbors. 
+The \citet{alvarez-socorro2015eigencentrality-66c} approach to eigenvector scoring assumes that we want to characterize nodes as most central when their connectivity strategy combines a logic of proximity to the well-connected with a logic of brokerage. However, in some applications, the most central nodes combine a logic of proximity to the most central with \textit{closure}, that is, connecting to others who are also linked to their neighbors. 
 
 This is particularly the case in networks that feature a core-periphery or ``nested shell'' structure with a well-connected group of nodes that are also connected at the center---also referred to as the ``rich club'' phenomenon. In this case, eigenvector scoring of the \textit{similarity} matrix $\mathbf{S}$ would make more sense. 
 
@@ -111,8 +110,40 @@ With the restriction that $0 \geq \delta \leq 1$ and $0 \geq \gamma \leq 1$.
 
 When $\alpha = \beta = 0$, then  $\mathbf{W} = \mathbf{A}$ and we recover the standard Eigenvector scores in Equation~\ref{eq:bon}. When $\alpha = 0$ and $\beta = 1$, then $\mathbf{W} = \mathbf{A} \odot (1 - \mathbf{S})$, which is the same as Equation~\ref{eq:ac1}, and when apply Equation~\ref{eq:ac2}, we recover the dissimilarity-weighted eigenvector scores of \citet{alvarez-socorro2015eigencentrality-66c}. When $\alpha = 1$ and $\beta = 0$, then $\mathbf{W} = \mathbf{A} \odot \mathbf{S}$ and when we apply Equation~\ref{eq:ac2}, we recover scores that weigh eigenvector scores by \textit{similarity} rather than dissimilarity, allowing us to identify nodes that are well connected to well-connected others who are also similar to them in terms of their local neighborhoods. Finally, when $\alpha > 0$ \textit{and} $\beta > 0$ then $\mathbf{W}$ is given by Equation~\ref{eq:gen}, and when we apply Equation~\ref{eq:ac2}, we recover a compromise ranking that takes both brokerage and closure into account. 
 
+The pseudocode for a revised version of Algorithm~\ref{alg:ac} implementing this idea is shown as Algorithm~\ref{alg:ol}.
+
+\begin{algorithm}[ht!]
+\caption{Proposed Algorithm for Generalized Similarity Scoring}
+\label{alg:ol}
+\begin{algorithmic}[1]
+\Require $\mathbf{A}, \alpha, \beta$ \Comment{$n \times n$ symmetric adjacency matrix and two scalar parameters}
+\Ensure $0 \geq \alpha \leq 1$
+\Ensure $0 \geq \alpha \leq 1$
+\State $\mathbf{P} \gets \mathbf{A}^2$ \Comment{Common neighbors matrix}
+\State $\mathbf{Q} \gets \mathbf{A}(1-\mathbf{A})$ \Comment{Non-shared neighbors matrix}
+\State $\mathbf{S} \gets \mathbf{P} \div \left(\mathbf{P}+\mathbf{Q}+\mathbf{Q}^T\right)$ \Comment{Jaccard similarity matrix}
+\State $\mathbf{D} \gets 1-\mathbf{S}$ \Comment{Jaccard distance matrix}
+\State $\mathbf{W} \gets \mathbf{A} \odot \mathbf{S}^\alpha \odot \mathbf{D}^\beta$ \Comment{element-wise product between $\mathbf{A}^\alpha$ and $\mathbf{D}^\beta$}
+\State Compute $\mathbf{s}$ \Comment{The left dominant eigenvector of $\mathbf{W}$}
+\State \Return $\mathbf{s}$ \Comment{$n \times 1$ column vector of non-negative scores}
+\end{algorithmic}
+\end{algorithm}
+
 \section*{Example}
-To get a sense of how the generalized eigenvector similarity approach works, I analyze the oft-considered Medici marriage network---also analyzed, inter alia, by \citet{alvarez-socorro2015eigencentrality-66c}.
+To get a sense of how the generalized eigenvector similarity approach works, I analyze the oft-considered Medici marriage network---also analyzed, inter alia, by \citet{alvarez-socorro2015eigencentrality-66c}. A point and line plot of the network is shown in Figure~\ref{fig:main}. The network shows the Medici, as has been established in myriad previous reanalyses at the center of a ``star'' subsection of the graph, connected to alters who do not tend to be connected with one another. We should expect, therefore, that they would fare well in a feedback central measure, such as that proposed by Alvarez-Socorro et al's \citeyearpar{alvarez-socorro2015eigencentrality-66c} in which being connected to well connected but locally dissimilar partners counts for more (and they show that in their paper). 
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{medici.png}
+    \caption{Combined Medici Marriage and Business Network}
+    \label{fig:main}
+\end{figure}
+
+However, if we were thinking of centrality as being better indexed by being connected to well-connected others, who are themselves connected to your neighbors, then we should not expect the Medici to fare as well. Instead it is clear that is the Peruzzi family, at the center of a ``wheel'' with connected spokes, who should be the most central. 
+
+\input{main}
+
+
 
 
 \newpage
