@@ -79,7 +79,7 @@ format:
             format = "latex", booktabs = TRUE, linesep = "",
             row.names = FALSE, align = rep(c("l", "c"), 4),
             digits = 3, col.names = c("Node", "Eig.", "Node", "Eig./Dis", "Node", "Eig./Sim", "Node", "Eig./Both"),
-            caption = "Eigenvector-Based Scores for the Medici Network.", label = "tab:main") %>%    
+            caption = "Eigenvector-Based Scores for the Medici Network.", label = "main") %>%    
             kable_styling(latex_options = c("scale_down")),
         file = here("main.tex")
         )
