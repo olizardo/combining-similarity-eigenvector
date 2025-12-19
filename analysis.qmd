@@ -66,6 +66,7 @@ format:
         row.names = FALSE, align = rep(c("l", "c"), 4),
         digits = 3, col.names = c("Node", "Eig.", "Node", "Eig./Dis", "Node", "Eig./Sim", "Node", "Eig./Both"),
         caption = "Top Ten Eigenvector-Based Scores for the Medici Network.") %>%    
-        kable_styling(latex_options = c("striped", "scale_down")),
+        kable_styling(latex_options = c("scale_down")), 
         file = here("main.tex"))
 ```
+
