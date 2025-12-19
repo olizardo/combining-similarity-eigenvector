@@ -124,9 +124,9 @@ The pseudocode for a revised version of Algorithm~\ref{alg:ac} implementing this
 \State $\mathbf{P} \gets \mathbf{A}^2$ \Comment{Common neighbors matrix}
 \State $\mathbf{Q} \gets \mathbf{A}(1-\mathbf{A})$ \Comment{Non-shared neighbors matrix}
 \State $\mathbf{S} \gets  \mathbf{P} \div \left(\mathbf{P}+\mathbf{Q}+\mathbf{Q}^T\right)$ \Comment{Jaccard similarity matrix}
-\State $\mathbf{S} \gets \mathbf{S} \div max(\mathbf{S})$ \Comment{Normalizing similarity matrix by maximum}
+%\State $\mathbf{S} \gets \mathbf{S} \div max(\mathbf{S})$ \Comment{Normalizing similarity matrix by maximum}
 \State $\mathbf{D} \gets 1-\mathbf{S}$ \Comment{Jaccard distance matrix}
-\State $\mathbf{D} \gets \mathbf{D} \div max(\mathbf{D})$ \Comment{Normalizing distance matrix by maximum}
+%\State $\mathbf{D} \gets \mathbf{D} \div max(\mathbf{D})$ \Comment{Normalizing distance matrix by maximum}
 \State $\mathbf{Z} \gets \mathbf{S}^\alpha \odot \mathbf{D}^\beta$ \Comment{Element-wise product of $\mathbf{S}^\alpha$ and $\mathbf{D}^\beta$}
 \State $\mathbf{W} \gets \mathbf{A} \odot \mathbf{Z}$ \Comment{element-wise product between $\mathbf{A}$ and $\mathbf{Z}$}
 \State Compute $\mathbf{s}$ using Equation~\ref{eq:ac2} \Comment{The right dominant eigenvector of $\mathbf{W}$}
