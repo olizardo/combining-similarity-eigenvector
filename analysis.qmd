@@ -24,8 +24,8 @@ format:
     plot(g, 
         vertex.size=8, vertex.frame.color="lightgray", 
         vertex.label.dist=2, edge.curved=0.2, 
-        vertex.label.cex = 1, edge.color = "gray",
-        edge.width = 2)
+        vertex.label.cex = 1.2, edge.color = "gray",
+        edge.width = 1.5)
     dev.off()
 ```
 
@@ -64,6 +64,6 @@ format:
     save_kable(kbl(eig.dat,
         format = "latex", booktabs = TRUE, linesep = "",
         row.names = FALSE, align = rep(c("l", "c"), 4),
-        digits = 3, col.names = c("Node", "Bonacich", "Node", "Eig./Dis", "Node", "Eig./Sim", "Node", "Eig./Both"),
+        digits = 3, col.names = c("Node", "Eig.", "Node", "Eig./Dis", "Node", "Eig./Sim", "Node", "Eig./Both"),
         caption = "Top Ten Eigenvector-Based Scores for the Medici Network.") %>%    kable_styling(bootstrap_options = c("hover", "condensed", "responsive")), file = here("main.tex"))
 ```
