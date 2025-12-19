@@ -1,0 +1,122 @@
+\documentclass[12pt]{article}
+\usepackage[left=1.15in, right=1.15in, top=1in, bottom=1.5in]{geometry}
+\usepackage{natbib}
+\usepackage{verbatim}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{amsmath}
+\usepackage{algpseudocode}
+\usepackage{url}
+\bibpunct[: ]{(}{)}{;}{a}{}{,} 
+\usepackage{authblk}
+\renewcommand\Authfont{\normalsize}
+\renewcommand\Affilfont{\footnotesize}
+
+\begin{document}
+\title{A Generalized Approach to Combining Similarity and Eigenvector Analysis of Networks\thanks{Reserved for acknowledgments}}
+\author[1]{Omar Lizardo\thanks{olizardo@soc.ucla.edu}}
+\affil[1]{Department of Sociology, UCLA}
+
+\renewcommand\Authands{ and }
+
+\date{\normalsize \today}	
+\maketitle
+
+\newpage
+\begin{abstract}
+\end{abstract}
+
+\section*{Introduction}
+The standard approach to computing ``feedback'' based indices of node position in networks is due to the classic work of \citep{bonacich1972factoring-03e}. Here, the idea of feedback reduces to the more specific notion that a node's ranking in the resulting index---which can be interpreted as a ``centrality'' measure \citep{borgatti2006graph-theoretic-1a0}---is higher if it is connected to others who are themselves well connected. Thus, if the adjacency relations in the network are presented in matrix $\mathbf{A}$ with $a_{ij} = 1$ if nodes $i$ and $j$ are connected in the underlying graph, then the vector of standard Bonacich scores $\mathbf{s}$ can be obtained via the solution to the linear system:
+
+\begin{equation}
+    \lambda_{1}\mathbf{s} = \mathbf{A}\mathbf{s}
+    \label{eq:bon}
+\end{equation}
+
+Where $\lambda_{1}$ is the leading (usually largest) eigenvalue of the adjacency matrix, also referred to as $\rho(\mathbf{A}$, or the ``spectral radius'' of the adjacency matrix. If $\lambda_{1}$ exists, then its associated $\mathbf{s}$ eigenvector also exists, and it is guaranteed (via the famous Perron-Frobenius theorem) to be composed of real non-negative scores, which can be used to induce a ranking on the nodes of the network \citep{vigna2016spectral-19a}.
+
+\section*{Combining Similarity and Eigenvector Ranking}
+
+In a recent contribution, \citet{alvarez-socorro2015eigencentrality-66c} propose to merge the Bonacich approach to feedback centrality scoring with the analysis of vertex similarity in networks \citep{leicht2006vertex-6f1}. Their basic idea is simple, proposing that we substitute the adjacency matrix in Equation~\ref{eq:bon} with a different matrix $\mathbf{W}$ which is defined as:
+
+\begin{equation}
+    \mathbf{W} = \mathbf{A} \odot (1 - \mathbf{S})
+    \label{eq:ac1}
+\end{equation}
+
+Where $\mathbf{S}$ is a matrix of (local) vertex \textit{similarities} (making $1-\mathbf{S}$ a dissimilarity or distance matrix), and the $\odot$ operation refers to the element-wise ``dot'' product. Their basic idea is to attach the local vertex \textit{dissimilarity} as a \textit{weight} on each edge in the network, and then compute the standard Bonacich scores on the dissimilarity weighted matrix to rank nodes in the network:
+
+\begin{equation}
+    \lambda_1\mathbf{s} = \mathbf{W}\mathbf{s}
+    \label{eq:ac2}
+\end{equation}
+
+There are many options with which to construct $\mathbf{S}$, but an attractive one is the Jaccard similarity $s^J$, because its complement $1-s^J$ returns a true metric distance (respecting the triangle inequality). In terms of the adjacency matrix, we can define the Jaccard similarity matrix as:
+
+\begin{equation}
+    \mathbf{S}^J = \frac{\mathbf{P}}{\mathbf{P}+\mathbf{Q}+\mathbf{Q}^T}
+\end{equation}
+
+With:
+
+\begin{subequations}
+\begin{equation}
+    \mathbf{P} = \mathbf{A}^2
+\end{equation}
+\begin{equation}
+    \mathbf{Q} = \mathbf{A}(1-\mathbf{A})
+\end{equation}
+\end{subequations}
+
+Conceptually, the approach of \citet{alvarez-socorro2015eigencentrality-66c} is motivated by the idea that being connected to well-connected others who are also \textit{dissimilar} from you (because they are not linked to your neighbors) should matter more in determining node ranking than being connected to well-connected others who are also connected to your neighbors. Thus, theoretically, this approach merges the ``feedback'' reasoning animating the Bonacich approach with the ``brokerage'' reasoning of Burt's \citeyearpar{burt1995structural-5e8} theory of structural holes. 
+
+Algorithm~\ref{alg:ac} presents pseudocode for a simple algorithm that implements Alvarez-Socorro et al.'s approach to eigenvector-based node scoring.
+
+\begin{algorithm}[ht!]
+\caption{Alvarez-Socorro's et al.'s \citeyearpar{alvarez-socorro2015eigencentrality-66c} Dissimilarity Scoring}
+\label{alg:ac}
+\begin{algorithmic}[1]
+\State \textbf{Input}: $\mathbf{A}$ \Comment{$n \times n$ symmetric adjacency matrix}
+\State $\mathbf{P} \gets \mathbf{A}^2$ \Comment{Common neighbors matrix}
+\State $\mathbf{Q} \gets \mathbf{A}(1-\mathbf{A})$ \Comment{Non-shared neighbors matrix}
+\State $\mathbf{S} \gets \mathbf{P} \div \left(\mathbf{P}+\mathbf{Q}+\mathbf{Q}^T\right)$ \Comment{Jaccard similarity matrix}
+\State $\mathbf{D} \gets 1-\mathbf{S}$ \Comment{Jaccard distance matrix}
+\State $\mathbf{W} \gets \mathbf{A} \odot \mathbf{D}$ \Comment{element-wise product between $\mathbf{A}$ and $\mathbf{D}$}
+\State Compute $\mathbf{s}$, the left dominant eigenvector of $\mathbf{W}$
+\State \textbf{Output}: \Comment{$n \times 1$ column vector of non-negative scores}
+\State \Return $\mathbf{s}$
+\end{algorithmic}
+\end{algorithm}
+
+\section*{A Generalized Approach}
+The \citet{alvarez-socorro2015eigencentrality-66c} approach to eigenvector scoring relies on the assumption that we want to characterize nodes as most central when their connectivity strategy combines a logic of proximity to the well-connected with a logic of brokerage. However, in some applications, the most central nodes combine a logic of proximity to the most central with \textit{closure}, that is, connecting to others who are also linked to their neighbors. 
+
+This is particularly the case in networks that feature a core-periphery or ``nested shell'' structure with a well-connected group of nodes that are also connected at the center---also referred to as the ``rich club'' phenomenon. In this case, eigenvector scoring of the \textit{similarity} matrix $\mathbf{S}$ would make more sense. 
+
+Given these competing analytic aims, it would seem appropriate to generalize Alvarez-Socorro's approach to give analysts the flexibility to specify either dissimilarity (brokerage) or similarity (closure) as the preferred criterion for eigenvector-based node ranking. 
+
+One option would be to modify Equation~\ref{eq:ac1} as follows:
+
+\begin{equation}
+    \mathbf{W} = \mathbf{A} \odot \left[\mathbf{S}^\alpha \odot (1 - \mathbf{S})^\beta\right]
+    \label{eq:gen}
+\end{equation}
+
+With the restriction that $0 \geq \delta \leq 1$ and $0 \geq \gamma \leq 1$.
+
+When $\alpha = \beta = 0$, then  $\mathbf{W} = \mathbf{A}$ and we recover the standard Eigenvector scores in Equation~\ref{eq:bon}. When $\alpha = 0$ and $\beta = 1$, then $\mathbf{W} = \mathbf{A} \odot (1 - \mathbf{S})$, which is the same as Equation~\ref{eq:ac1}, and when apply Equation~\ref{eq:ac2}, we recover the dissimilarity-weighted eigenvector scores of \citet{alvarez-socorro2015eigencentrality-66c}. When $\alpha = 1$ and $\beta = 0$, then $\mathbf{W} = \mathbf{A} \odot \mathbf{S}$ and when we apply Equation~\ref{eq:ac2}, we recover scores that weigh eigenvector scores by \textit{similarity} rather than dissimilarity, allowing us to identify nodes that are well connected to well-connected others who are also similar to them in terms of their local neighborhoods. Finally, when $\alpha > 0$ \textit{and} $\beta > 0$ then $\mathbf{W}$ is given by Equation~\ref{eq:gen}, and when we apply Equation~\ref{eq:ac2}, we recover a compromise ranking that takes both brokerage and closure into account. 
+
+\section*{Example}
+To get a sense of how the generalized eigenvector similarity approach works, I analyze the oft-considered Medici marriage network---also analyzed, inter alia, by \citet{alvarez-socorro2015eigencentrality-66c}.
+
+
+\newpage
+\bibliography{references}
+\bibliographystyle{asr}
+
+\end{document}
