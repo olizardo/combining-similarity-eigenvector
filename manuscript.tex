@@ -49,7 +49,9 @@ In a recent contribution, \citet{alvarez-socorro2015eigencentrality-66c} propose
     \label{eq:ac1}
 \end{equation}
 
-Where $\mathbf{S}$ is a matrix of (local) vertex \textit{similarities} (making $1-\mathbf{S}$ a dissimilarity or distance matrix), and the $\odot$ operation refers to the element-wise ``dot'' product. In essence, what \citet{alvarez-socorro2015eigencentrality-66c} are doing is attaching the local vertex \textit{dissimilarity} as a \textit{weight} on each edge in the network, and then computing the standard Bonacich scores on the dissimilarity weighted matrix to rank nodes in the network, leading to the modified linear system:
+Where $\mathbf{S}$ is a matrix of (local) vertex \textit{similarities} (making $1-\mathbf{S}$ a dissimilarity or distance matrix), and the $\odot$ operation refers to the element-wise ``dot'' product. In essence, what \citet{alvarez-socorro2015eigencentrality-66c} are doing is attaching the local vertex \textit{dissimilarity} as a \textit{weight} on each edge in the network (setting the dissimilarity scores of non-adjacent nodes to zero), and then computing the standard Bonacich scores from the dissimilarity weighted adjacency matrix to rank nodes in the network.
+
+This leads to the modified linear system:
 
 \begin{equation}
     \lambda_1\mathbf{s} = \mathbf{W}\mathbf{s}
