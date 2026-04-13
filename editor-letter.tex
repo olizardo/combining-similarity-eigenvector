@@ -1,0 +1,56 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[left=1.15in, right=1.15in, top=1in, bottom=1.5in]{geometry}\usepackage{hyperref}
+\usepackage{amsmath}
+
+\begin{document}
+
+\noindent Dear Prof. Lizardo,
+
+\subsection*{Decision letter}
+
+This is a nice paper. I especially like the alpha and beta coefficients which so neatly generalize Alvarez-Socorro (though see my comments on parameter selection). I am happy to accept the paper as is, but I would recommend that you look at my and reviewers' suggestions and make changes that you agree with and which are not too onerous.
+
+I strongly agree with Reviewer 1's comment about adding ``why" framing to the paper, both in the intro, and after the method has been explicated. This also relates to Reviewer 2's lament that you don't do much to interpret the Peruzzi result. Ideally, you would add a second empirical illustration that includes an outcome variable.
+
+You inherited the Jaccard coefficient from Alvarez-Socorro et al., so you don't spend much time on why use that measure, nor do you point out that other similarity measures could be used. (Perhaps you thought that obvious.) Jaccard is nice but does have some idiosyncrasies. For example, one issue with Jaccard is that higher-degree nodes tend to swamp lower-degree nodes. Two nodes might share a substantial portion of the smaller node's neighbors yet still have low Jaccard similarity because the denominator (the union) is large. This can obscure meaningful local similarity. This suggests a directed version of the index:
+\[ s(i \rightarrow j) = \frac{|N_i \cap N_j|}{|N_i|} \]
+Essentially, what proportion of $i$'s contacts are shared by $j$. You could then analyze the non-symmetric Jaccard index with SVD, or via beta centrality (see Everett and Schoch, 2022). Just something that's fun to think about.
+
+Also, adjacent nodes with no common neighbors have Jaccard similarity of zero. The behavior of $S^\alpha$ when $S$ contains zeros (particularly for $\alpha$ approaching 0) might warrant discussion. This reminds me that you could also explicitly discuss edge cases, such as when $\alpha = 0$ and you have $0^0$. We assume this is 1, but it could be made explicit. Similarly, if $A$ is a connected graph, $W$ can become effectively disconnected. Consider the similarity-only case $(\alpha=1, \beta=0)$, $W = A \cdot S$. Any edge between nodes with no common neighbors gets weight zero. In a sparse graph, this could sever the graph.
+
+You attribute the choice of $\alpha=0.15$ and $\beta=0.85$ for the hybrid column to "informal experimentation," with a footnote explaining that similar-magnitude values yield rankings dominated by similarity. This raises a question the paper doesn't address: how should an analyst choose alpha and beta in practice? A table showing how rankings shift across the $(\alpha, \beta)$ space — even just for this one network — would help the reader develop an intuition about the parameters. As written, the two parameters are presented as a feature but without guidance on selection.
+
+The paper writes "$0 \ge \alpha \le 1$" in multiple places. I would suggest "$0 \le \alpha \le 1$". Algorithm 2 states the alpha constraint twice. On page 8 you describe Alvarez-Socorro et al.'s approach as "$(\alpha=1 \text{ and } \beta=0)$" but isn't it $\alpha=0$ and $\beta=1$?
+
+Your revision is due by \textbf{Jun 11, 2026}. To submit a revision, go to \url{https://www.editorialmanager.com/connections/} and log in as an Author. You will see a menu item call \textit{Submission Needing Revision}. You will find your submission record there.
+
+\vspace{1em}
+\noindent Sincerely, \\
+Steve Borgatti \\
+Managing Editor, Connections
+
+\pagebreak
+
+\subsection*{Reviewers' comments:}
+
+\subsubsection*{Reviewer 1}
+This paper proposes combining similarity/distances with eigenvector centrality. To do so, one computes pairwise similarities or distances using standard methods, and then applies an eigenspectrum decomposition to the similarity/distance measure. Existing work has looked at doing this with similarities. The present generalization is to point out that dissimilarity can be used as well. That seems like a sufficient contribution for Connections, but that's up to the Editors to make that call.
+
+My main comment is that I think it would be useful to spend the intro discussing why you would want to do this. Specifically, under what circumstances would spectral analysis of similarities be useful? And when would spectral analysis of dissimilarities be useful? You jump right into the method/math, but conceptually why do you want to do that? Providing a couple of empirical contexts/research questions where this method would be useful would help sell the utility.
+
+My other comment is that it would be great to post replication materials online. That makes the method more accessible, particularly for those who do not develop new methods.
+
+\subsubsection*{Reviewer 2}
+This submission is a very clearly written and concise research note demonstrating how an approach by Alvarez-Socorro et al. (2015) which utilizes the eigenvector associated with the largest eigenvalue of a dissimilarity matrix (in place of an adjacency matrix) to identify nodes high in "brokerage." The contribution of this paper is to recommend that an input matrix of similarities would work similarly to identify nodes high in prominence. The paper provides pseudocode in addition to the explication of terms so that what is introduced and the relationship among terms is unambiguous.
+
+The literature review combined with the concluding remarks demonstrates where this fits into the literature, although the review is weighted toward recent work and some classic metrics that should be discussed are not mentioned. Specifically, it seemed odd that the authors did not mention: Bonacich, P. (1987). Power and centrality: A family of measures. American journal of sociology, 92(5), 1170-1182. In fact, there is a whole collection of metrics based on the principal eigenvector of some weighting of the adjacency matrix that should be considered.
+
+The empirical example used is the Medici data, but the analysis and explanation are insufficient to demonstrate the benefit of this approach to other approaches. The manner in which the paper is written is very accessible, which is nice. A second issue is the empirical analysis of the Medici data joined the business and marriage relations. It is not the first time I have seen this, but given the findings of the original analysis (Padgett \& Ansell, 1993) demonstrates why it is so important to consider these relationships separately, I do not understand why the authors did not pick one or the other to get a clearer and more interpretable illustration of what their proposed measure(s) add.
+
+The discussion of the way to interpret the data was very shallow. It was very hard to follow the description of these data; although it is clear that these different weightings produced different orderings, it is not clear why. Medici is only at the top of one column, the Dissimilarity column. The Peruzzi family was at the top of all others. What is not explained is why there were these differences. 
+
+Overall, this paper has potential, but there is not enough here to be persuasive. A richer literature review and more serious look at the meaning of the results are needed to reveal any benefit to this approach.
+
+\end{document}
+\end{document}

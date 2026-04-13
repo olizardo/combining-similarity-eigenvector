@@ -28,8 +28,10 @@
 
 \newpage
 \begin{abstract}
+This paper presents a generalized approach to combining two key ideas in social network analysis: pairwise node similarity (based on local neighborhoods) and spectral ranking using feedback centralities (such as Bonacich's eigenvector scores). Building on the work of Alvarez-Socorro et al. (2015), who proposed weighing network edges by the dissimilarity between connected nodes to favor brokerage (connecting to well-connected, dissimilar others), the proposed generalization allows analysts to specify either dissimilarity or similarity as the preferred criterion. Weighing by similarity is argued to be more consistent with the idea of prominence as membership in a centralized core of well-connected nodes (closure). The generalized approach introduces parameters ($\alpha$ and $\beta$) to combine these two strategies, yielding a compromise ranking that accounts for both brokerage and closure. An analysis of the classic Florentine Families network demonstrates that the Medici family specializes in brokerage, ranking highest when a dissimilarity weight is used. In contrast, the Peruzzi family emerges as the most central when an approach that rewards similarity/closure is used.
 \end{abstract}
 
+\newpage
 \section*{Introduction}
 The standard approach to computing ``feedback'' based indices of node position in networks is due to the classic work of \citep{bonacich1972factoring-03e}. Here, the idea of feedback reduces to the more specific notion that a node's ranking in the resulting index---which can be interpreted as a ``centrality'' measure \citep{borgatti2006graph-theoretic-1a0}---is higher if it is connected to others who are themselves well connected. Thus, if the (undirected) adjacency relations in the network are represented in the (symmetric) matrix $\mathbf{A}$ with $a_{ij} = 1$ if nodes $i$ and $j$ are connected in the underlying graph, then the vector of standard Bonacich scores $\mathbf{s}$ can be obtained via the solution to the linear system:
 
@@ -58,7 +60,7 @@ This leads to the modified linear system:
     \label{eq:ac2}
 \end{equation}
 
-There are many options with which to construct $\mathbf{S}$, but an attractive one is the Jaccard similarity $s^J$, because its complement $1-s^J$ returns a true metric distance (respecting the triangle inequality). In terms of the adjacency matrix, we can define the Jaccard similarity matrix as:
+There are many options from which to construct $\mathbf{S}$, but an attractive one is the Jaccard similarity $s^J$, because its complement $1-s^J$ returns a true metric distance (respecting the triangle inequality). In terms of the adjacency matrix, we can define the Jaccard similarity matrix as:
 
 \begin{equation}
     \mathbf{S} = \frac{\mathbf{P}}{\mathbf{P}+\mathbf{Q}+\mathbf{Q}^T}
@@ -88,16 +90,16 @@ Algorithm~\ref{alg:ac} presents pseudocode for a simple algorithm that implement
 \State $\mathbf{Q} \gets \mathbf{A}(1-\mathbf{A})$ \Comment{Non-shared neighbors matrix}
 \State $\mathbf{S} \gets \mathbf{P} \div \left(\mathbf{P}+\mathbf{Q}+\mathbf{Q}^T\right)$ \Comment{Jaccard similarity matrix}
 \State $\mathbf{D} \gets 1-\mathbf{S}$ \Comment{Jaccard distance matrix}
-\State $\mathbf{W} \gets \mathbf{A} \odot \mathbf{D}$ \Comment{element-wise product between $\mathbf{A}^\alpha$ and $\mathbf{D}$}
+\State $\mathbf{W} \gets \mathbf{A} \odot \mathbf{D}$ \Comment{element-wise product between $\mathbf{A}$ and $\mathbf{D}$}
 \State Compute $\mathbf{s}$ using Equation~\ref{eq:ac2} \Comment{The right dominant eigenvector of $\mathbf{W}$}
 \State \Return $\mathbf{s}$ \Comment{$n \times 1$ column vector of non-negative scores}
 \end{algorithmic}
 \end{algorithm}
 
 \section*{A Generalized Approach}
-The \citet{alvarez-socorro2015eigencentrality-66c} approach to eigenvector scoring assumes that we want to characterize nodes as most central when their connectivity strategy combines a logic of proximity to the well-connected with a logic of brokerage between disconnected others. However, in some applications, the most central nodes may be ones combining a logic of proximity to the most central with \textit{closure}, that is, connecting to others who are also linked to their neighbors. 
+The \citet{alvarez-socorro2015eigencentrality-66c} approach to eigenvector scoring assumes that we want to characterize nodes as most central when their connectivity strategy combines a logic of proximity to the well-connected with a logic of brokerage between disconnected others. However, in some applications, the most central nodes may be those that combine a logic of proximity to the most central with \textit{closure}, that is, connecting to others who are also linked to their neighbors. 
 
-This is particularly the case in networks that feature a core-periphery or ``nested shell'' structure with a well-connected group of nodes that are also connected to one another at the center and another set of less well-connected nodes at the periphery \citep{borgatti2000models-3c1}---also referred to as the ``rich club'' phenomenon \citep{colizza2006detecting}. In this case, eigenvector scoring of the \textit{similarity}-weighted adjacency matrix $\mathbf{S}$ would make more sense and likely yield a substantively different ranking of the nodes. 
+This is particularly the case in networks that feature a core-periphery or ``nested shell'' structure with a well-connected group of nodes that are also mutually connected at the center and another set of less well-connected nodes at the periphery \citep{borgatti2000models-3c1}---also referred to as the ``rich club'' phenomenon \citep{colizza2006detecting}. In this case, eigenvector scoring of the \textit{similarity}-weighted adjacency matrix $\mathbf{S}$ would make more sense and likely yield a substantively different ranking of the nodes. 
 
 Given these competing analytic aims, it would seem appropriate to generalize Alvarez-Socorro et al.'s approach to give analysts the flexibility to specify either dissimilarity (brokerage) or similarity (closure) as the preferred criterion for eigenvector-based node ranking, or perhaps attempt to balance between the two. 
 
@@ -125,9 +127,7 @@ The pseudocode for a revised version of Algorithm~\ref{alg:ac} implementing this
 \State $\mathbf{P} \gets \mathbf{A}^2$ \Comment{Common neighbors matrix}
 \State $\mathbf{Q} \gets \mathbf{A}(1-\mathbf{A})$ \Comment{Non-shared neighbors matrix}
 \State $\mathbf{S} \gets  \mathbf{P} \div \left(\mathbf{P}+\mathbf{Q}+\mathbf{Q}^T\right)$ \Comment{Jaccard similarity matrix}
-%\State $\mathbf{S} \gets \mathbf{S} \div max(\mathbf{S})$ \Comment{Normalizing similarity matrix by maximum}
 \State $\mathbf{D} \gets 1-\mathbf{S}$ \Comment{Jaccard distance matrix}
-%\State $\mathbf{D} \gets \mathbf{D} \div max(\mathbf{D})$ \Comment{Normalizing distance matrix by maximum}
 \State $\mathbf{Z} \gets \mathbf{S}^\alpha \odot \mathbf{D}^\beta$ \Comment{Element-wise product of $\mathbf{S}^\alpha$ and $\mathbf{D}^\beta$}
 \State $\mathbf{W} \gets \mathbf{A} \odot \mathbf{Z}$ \Comment{element-wise product between $\mathbf{A}$ and $\mathbf{Z}$}
 \State Compute $\mathbf{s}$ using Equation~\ref{eq:ac2} \Comment{The right dominant eigenvector of $\mathbf{W}$}
@@ -135,10 +135,10 @@ The pseudocode for a revised version of Algorithm~\ref{alg:ac} implementing this
 \end{algorithmic}
 \end{algorithm}
 
-\section*{Example}
-To get a sense of how the generalized eigenvector similarity approach works, I analyze the oft-considered Florentine Families network of \citet{padgett1993robust-4cc}---also analyzed, inter alia, by \citet{alvarez-socorro2015eigencentrality-66c}. I construct the network by merging the marriage and business ties and linking two families if they are connected by either or both types of ties.\footnote{Data were obtained from the \texttt{R} package \texttt{networkdata} \citep{schoch-network-data}.} The data therefore can be represented by an undirected graph and associated symmetric adjacency matrix. 
+\section*{Data Example}
+To get a sense of how the generalized eigenvector similarity approach works, I analyze the oft-considered Florentine Families network of \citet{padgett1993robust-4cc}---also analyzed, inter alia, by \citet{alvarez-socorro2015eigencentrality-66c}. I construct the network by merging the marriage and business ties and linking two families if they are connected by either or both types of ties.\footnote{Data were obtained from the \texttt{R} package \texttt{networkdata} \citep{schoch-network-data}.} The network can therefore be represented by an undirected graph and its associated symmetric adjacency matrix. 
 
-A point and line plot of the Florentine families network is shown in Figure~\ref{fig:main}. The network shows, as has been observed in myriad previous analyses of this network, the Medici at the center of a ``star'' subsection of the graph, connected to alters who are not mutually connected. We should expect, therefore, that they would fare well in a feedback central measure, such as that proposed by Alvarez-Socorro et al's \citeyearpar{alvarez-socorro2015eigencentrality-66c} in which being connected to well-connected but locally dissimilar partners counts for more (and they show that in their paper). 
+A point and line plot of the Florentine Families network is shown in Figure~\ref{fig:main}, using the standard \texttt{igraph} layout algorithm to determine node position \citep{csardi06}. The network shows, as has been observed in myriad previous analyses of this network, the Medici at the center of a ``star'' subsection of the graph, connected to alters who are not mutually connected. We should expect, therefore, that they would fare well in a feedback central measure, such as that proposed by Alvarez-Socorro et al's \citeyearpar{alvarez-socorro2015eigencentrality-66c} in which being connected to well-connected but locally dissimilar partners counts for more (and they show that in their paper). 
 
 \begin{figure}[ht!]
     \centering
@@ -149,11 +149,22 @@ A point and line plot of the Florentine families network is shown in Figure~\ref
 
 However, if we were thinking of centrality as being better indexed by being connected to well-connected others, who are themselves connected to your neighbors, then we should not expect the Medici to fare as well. Instead, it is the Peruzzi family, at the center of a ``wheel'' with connected spokes, who should be the most central. 
 
-Table~\ref{tab:main} shows the results. The first two columns of the table show the rankings according to the standard \citet{bonacich1972factoring-03e} centrality and the \citet{alvarez-socorro2015eigencentrality-66c} scoring. All scores are normalized to fall within the zero to one range. We can see that both the Peruzzi and the Medici families emerge as most central when using the raw eigenvector scoring (with the Peruzzi slightly edging out the Medici for the top spot). However, we can see that once we adopt Alvarez-Socorro et al.'s approach, which rewards both well-connectedness \textit{and} brokerage, the Medici emerge as the undisputed most central actors in the network, consistent with Padgett and Ansell's \citeyearpar{padgett1993robust-4cc} which relied on betweenness. The Peruzzi, scored as the most central in the standard eigenvector scoring, drop to fourth place. 
-
-The last two columns of the table show the scoring obtained from Equation~\ref{eq:gen}, first using $\alpha = 1$ and $\beta = 0$ (giving all weight to being connected to well-connected others who are also adjacent to your other neighbors), and $\alpha = 0.15$ and $\beta = 0.85$.\footnote{Informal experimentation suggested that selecting values for $\alpha$ and $\beta$ of similar magnitude resulted in ranks substantively indistinguishable from those in columns 5 and 6, suggesting that the similarity dominates over the dissimilarity. Selecting parameters favoring the dissimilarity weights resulted in something closer to a compromise ranking.} From the similarity-based scoring, we can see that the Peruzzi are the undisputed most central actors in the network, while the Medici are fairly peripheral. The other top actors, according to this scoring, all belong to the well-connected core actors revolving around the Peruzzi in the right-hand of Figure~\ref{fig:main}. We can also see that the ``hybrid'' approach, even though it gives more weight to dissimilarities than to similarities, is still dominated by the similarity-based ranking. We observe some reshuffling of the order in column eight compared to column six, but overall, the same substantive story is told (the Peruzzi and their satellites are the top actors). 
-
 \input{main}
+
+Table~\ref{tab:main} shows the results.\footnote{All scores are normalized to fall within the zero to one range.} The first two columns of the table show the rankings according to the standard \citet{bonacich1972factoring-03e} centrality and the \citet{alvarez-socorro2015eigencentrality-66c} scoring ($\alpha = 0$ and $\beta = 0$). We can see that both the Peruzzi and the Medici families emerge as most central when using the raw eigenvector scoring (with the Peruzzi slightly edging out the Medici for the top spot). However, we can see that once we adopt Alvarez-Socorro et al.'s approach ($\alpha = 0$ and $\beta = 1$), which rewards both well-connectedness \textit{and} brokerage, the Medici emerge as the undisputed most central actors in the network, consistent with Padgett and Ansell's \citeyearpar{padgett1993robust-4cc} classic analysis, which relied on the betweenness centrality (another metric that rewards brokerage). The Peruzzi, scored as the most central in the standard eigenvector scoring, drop to fourth place. 
+
+The last two columns of the table show the rankings obtained from Equation~\ref{eq:gen}, first (columns five and six) using $\alpha = 1$ and $\beta = 0$ (giving all weight to being connected to well-connected others who are also adjacent to your other neighbors), and then using $\alpha = 0.15$ and $\beta = 0.85$ (columns seven and eight).\footnote{Informal experimentation suggested that selecting values for $\alpha$ and $\beta$ of similar magnitude resulted in ranks substantively indistinguishable from those in columns 5 and 6, indicating that the similarity dominates over the dissimilarity. Selecting parameters that favor dissimilarity weights yielded a ranking closer to a compromise.} 
+
+From the similarity-based scoring, we can see that the Peruzzi are the undisputed most central actors in the network, while the Medici are fairly peripheral. The other top actors, according to this scoring, all belong to the well-connected core actors revolving around Peruzzi on the right-hand side of Figure~\ref{fig:main}. 
+
+We can also see that the ``hybrid'' approach, as expected, produces a compromise ranking in which nodes that combine both brokerage and similarity-based connectivity strategies appear toward the top. The Barbadori family is notable in this respect: They are a distant second in the approach of \citet{alvarez-socorro2015eigencentrality-66c} and in sixth place when ranking nodes according to the similarity weight, but they appear in second place in the hybrid rank, suggesting they do a good job of combining both brokerage and closure connectivity strategies.  
+
+\section*{Discussion and Concluding Remarks}
+This short methodological note presents a generalized approach to combining the reasoning behind analyses of social networks that focus on pairwise similarities between nodes based on their local neighborhood \citep{leicht2006vertex-6f1} with spectral ranking based on the idea of feedback centralities, where nodes are central when they are directly and indirectly connected to central others \citep{bonacich1972factoring-03e}. Building on recent work by \citet{alvarez-socorro2015eigencentrality-66c} who propose to use the pairwise dissimilarities between nodes as a weight on each edge before estimating the usual Bonacich eigenvector rankings, I argue that in some settings it might be more desirable to weigh the edges by the \textit{similarity}, as this may be more consistent with the idea of prominence as membership in a centralized core of well-connected nodes. 
+
+The generalized approach also allows us to \textit{combine} these two analytic strategies, ranking nodes highly when they hedge their bets and combine both connectivity strategies. Analysis of the classic Florentine Families dataset of \citet{padgett1993robust-4cc} reveals that, when considering two different connectivity strategies, the much heralded Medici family emerges as \textit{brokerage specialists}: Undisputedly the top nodes when the pairwise dissimilarities between connected dyads are used as edge weights before eigenvector ranking. When we use ranking approaches that reward belonging to well-connected cores, however, the Medici emerge as largely peripheral nodes in the network. 
+
+The approach proposed here can also be extended to other families of feedback-based centralities. For instance, the famous all-paths centrality due to \citet{katz1953new-19a} could be extended in the same way, by substituting $\mathbf{W}$ for $\mathbf{A}$ in the usual calculation. Here, we would consider them central if they share many paths with many others, where the paths are weighted by either similarity or dissimilarity, depending on the application.  The same approach can be used with other attenuated path-based measures of node position, such as communicability centrality \citep{estrada2010network-294}, which can be fruitfully combined with similarity/dissimilarity analysis in the same way. 
 
 
 
