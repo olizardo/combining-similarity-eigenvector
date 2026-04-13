@@ -1,0 +1,21 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[left=1.15in, right=1.15in, top=1in, bottom=1.5in]{geometry}\usepackage{hyperref}
+\usepackage{amsmath}
+
+\begin{document}
+\title{Response Memo}
+\maketitle
+\section{Editor's Comments}
+\subsection{``Why'' Framing}
+\subsection{Why Jaccard?}
+My selection of the Jaccard coefficient was driven by three considerations (1) simplicity (easy to calculate), (2) popularity (it is used across many fields), (3) given the fact that part of the algorithm requires computing a distance from a similarity matrix by subtracting one from the similarity score, the fact that the  Jaccard returns a true distance (an ultrametric) following this procedure while other similarities do not. Of course, there are many similarity metrics available (including cosine, Dice/Sorensen, and the asymmetric options such as the one suggested by the editor). Not all of them return as ultrametric when converted to distances, which may be a consideration, and all have their advantages and drawbacks (as the editor notes with respect to Jaccard). Most, like the Jaccard, are simple functions of the adjacency matrix (e.g., the total number of neighbors and the number of shared neighbors), so they are easy to compute and ``plugged in'' to compute $\mathbf{S}$ if the user so wishes. I briefly clarify that point in the current version of the paper. 
+\subsection{Choosing $\alpha$ and $\beta$}
+\section{Reviewer 1}
+\subsection{What's the conceptual justification for the method?}
+\subsection{Post replication materials online}
+\section{Reviewer 2}
+\subsection{No discussion of some classic metrics}
+\subsection{More explanation of the data used}
+\subsection{More interpretation of the data}
+\end{document}
