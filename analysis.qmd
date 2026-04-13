@@ -151,6 +151,6 @@ format:
         breaks =  unique(c.long$Beta)[seq(1, 21, by = 2)],
         labels = sprintf("%.2f", seq(0, 1, by = 0.05))[seq(1, 21, by = 2)]
         )
-    p <- p + theme(text = element_text(size = 20))
+    p <- p + theme(text = element_text(size = 20)) + xlab("Beta Value")
     ggsave(here("bump.png"), height = 10, width = 15)
 ```
