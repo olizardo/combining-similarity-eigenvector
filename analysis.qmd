@@ -13,7 +13,7 @@ format:
 
 ## Setup
 
-```{r}
+```{r loading packages}
     library(networkdata)
     library(igraph)
     library(here)
@@ -22,13 +22,17 @@ format:
     library(ggplot2)
     library(ggbump)
     library(ggrepel)
-    g <- flo_marriage + flo_business
-    g <- subgraph(g, which(degree(g) > 1))
+    library(kableExtra)
+```
+
+```{r getting network data}
+    g <- flo_marriage + flo_business #merging business and marriage network
+    g <- subgraph(g, which(degree(g) > 1)) #getting rid of isolate and pendant nodes
 ```
 
 ## Network Plot
 
-```{r}
+```{r Network plot}
     set.seed(345)
     png("medici.png", width = 800, height = 600)
     plot(g, 
@@ -42,36 +46,37 @@ format:
 ## Main Function
 
 ```{r}
-    prestige.sim <- function(x, alpha = 0, beta = 0) {
-        A <- as.matrix(as_adjacency_matrix(x))
-        A.p <- A %*% A 
-        A.q <- A %*% (1 - A)  
-        S <- A.p / (A.p + A.q + t(A.q))
-        D <- 1 - S
-        W <- A * (S^alpha * D^beta)
-        s <- abs(eigen(W)$vectors[, 1])
-        names(s) <- rownames(A)
-        s <- (s - min(s))/(max(s) - min(s))
-        #s <- s/max(s)
-        return(list(s = s, D = D, S = S, W = W))
+    prestige.sim <- function(x, a = 0, b = 0) {
+        z <- as.matrix(as_adjacency_matrix(x))
+        p <- z %*% z
+        q <- z %*% (1 - z)  
+        j <- p / (p + q + t(q))
+        d <- 1 - j
+        w <- z * (j^a * d^b)
+        s <- abs(eigen(w)$vectors[, 1])
+        s <- (s - min(s))/(max(s) - min(s)) #normalizing
+        names(s) <- V(x)$name
+        return(round(s, 4))
         }
+    prestige.sim.vec <- Vectorize(prestige.sim) #vectorized version of the function
 ```
 
 ## Main Table
 
-```{r}
-    bon <- prestige.sim(g, alpha = 0, beta = 0)
-    ace <- prestige.sim(g, alpha = 0, beta = 1)
-    ol1 <- prestige.sim(g, alpha = 1, beta = 0)
-    ol2 <- prestige.sim(g, alpha = 0.15, beta = 0.85)
+```{r creating data for table}
+    bon <- prestige.sim(g, a = 0, b = 0)
+    ace <- prestige.sim(g, a = 0, b = 1)
+    ol1 <- prestige.sim(g, a = 1, b = 0)
+    ol2 <- prestige.sim(g, a = 0.15, b = 0.85)
     sort.vec <- function(x) {
         x <- data.frame(Node = names(x), Score = as.numeric(x))
         x <- x[order(x$Score, decreasing = TRUE), ]
         return(x)
         }
-    eig.dat <- data.frame(sort.vec(bon$s), sort.vec(ace$s), sort.vec(ol1$s), sort.vec(ol2$s))
-    library(kableExtra)
-    library(here)
+    eig.dat <- data.frame(sort.vec(bon), sort.vec(ace), sort.vec(ol1), sort.vec(ol2))
+```
+
+```{r saving html table}
     kbl(eig.dat,
         format = "html",
         row.names = FALSE, align = rep(c("l", "c"), 4),
@@ -81,7 +86,7 @@ format:
                     c("hover", "condensed", "responsive"))
 ```
 
-```{r}
+```{r saving latex table}
     save_kable(
         kbl(eig.dat,
             format = "latex", booktabs = TRUE, linesep = "",
@@ -97,36 +102,22 @@ format:
 
 ```{r}
     beta.range <- seq(0, 1, by = 0.05)
-     for (b in beta.range) {
-        a <- 1-b
-         if (b == min(beta.range)) {
-             c <- prestige.sim(g, alpha = a, beta = b)$s
-             }
-         else if (b > min(beta.range)) {
-             c <- cbind(c, prestige.sim(g, alpha = a, beta = b)$s)
-         }
-     }
-```
-
-```{r}
-    c.rank <- apply(c, 2, function(x){rank(x)})
+    prestige.sim.vec(list(g), a = 1-beta.range, b = beta.range)
     c.dat <- data.frame(c)
-    names(c.dat) <- paste("V", 1:ncol(c), sep = "_")
-    c.dat <- data.frame(person = cbind(rownames(c), c.dat))
+    names(c.dat) <- sprintf("%.2f", seq(0, 1, by = 0.05))
+    c.dat <- data.frame(person = rownames(c), c.dat)
     c.long <-  c.dat %>% 
          pivot_longer(
-               cols = 1:ncol(c)+1,
-               names_to = "Beta",
-               values_to = "b"
+            cols = !person,
+            names_to = "Beta",
+            values_to = "value"
           ) |> 
-        rename(person = person.rownames.c.) |> 
         mutate(Beta = factor(Beta, ordered = TRUE, levels = colnames(c.dat)[-1])) 
     head(c.long)
 ```
 
-
-```{r}
-    p <- ggplot(data = c.long, mapping = aes(x = Beta, y = b, 
+```{r Bump Chart}
+    p <- ggplot(data = c.long, mapping = aes(x = Beta, y = value, 
     color = person, group = person))
     p <- p + geom_vline(aes(xintercept = which(sprintf("%.2f", seq(0, 1, by = 0.05)) == "0.85")), linetype = 2, color = "red")
     p <- p + geom_bump(linewidth = 0.8, smooth = 2)
@@ -154,7 +145,7 @@ format:
         breaks =  unique(c.long$Beta)[seq(1, 21, by = 2)],
         labels = sprintf("%.2f", seq(0, 1, by = 0.05))[seq(1, 21, by = 2)]
         )
-    p <- p + theme(text = element_text(size = 24)) + xlab("Beta Value")
+    p <- p + theme(text = element_text(size = 24)) + xlab("Beta")
     p
     ggsave(here("bump.png"), height = 10, width = 15)
 ```
