@@ -32,8 +32,8 @@ format:
     set.seed(345)
     png("medici.png", width = 800, height = 600)
     plot(g, 
-        vertex.size=8, vertex.frame.color="lightgray", 
-        vertex.label.dist=2, edge.curved=0.2, 
+        vertex.size=10, vertex.frame.color="lightgray", 
+        vertex.label.dist=2, 
         vertex.label.cex = 1.2, edge.color = "gray",
         edge.width = 2)
     dev.off()
