@@ -52,6 +52,7 @@ format:
         s <- abs(eigen(W)$vectors[, 1])
         names(s) <- rownames(A)
         s <- (s - min(s))/(max(s) - min(s))
+        #s <- s/max(s)
         return(list(s = s, D = D, S = S, W = W))
         }
 ```
@@ -108,6 +109,7 @@ format:
 ```
 
 ```{r}
+    c.rank <- apply(c, 2, function(x){rank(x)})
     c.dat <- data.frame(c)
     names(c.dat) <- paste("V", 1:ncol(c), sep = "_")
     c.dat <- data.frame(person = cbind(rownames(c), c.dat))
@@ -126,6 +128,7 @@ format:
 ```{r}
     p <- ggplot(data = c.long, mapping = aes(x = Beta, y = b, 
     color = person, group = person))
+    p <- p + geom_vline(aes(xintercept = which(sprintf("%.2f", seq(0, 1, by = 0.05)) == "0.85")), linetype = 2, color = "red")
     p <- p + geom_bump(linewidth = 0.8, smooth = 2)
     p <- p + geom_point(size = 2)
     p <- p + geom_text_repel(
@@ -152,5 +155,6 @@ format:
         labels = sprintf("%.2f", seq(0, 1, by = 0.05))[seq(1, 21, by = 2)]
         )
     p <- p + theme(text = element_text(size = 20)) + xlab("Beta Value")
+    p
     ggsave(here("bump.png"), height = 10, width = 15)
 ```
