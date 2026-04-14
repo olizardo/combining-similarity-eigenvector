@@ -130,7 +130,7 @@ format:
     color = person, group = person))
     p <- p + geom_vline(aes(xintercept = which(sprintf("%.2f", seq(0, 1, by = 0.05)) == "0.85")), linetype = 2, color = "red")
     p <- p + geom_bump(linewidth = 0.8, smooth = 2)
-    p <- p + geom_point(size = 2)
+    p <- p + geom_point(size = 3)
     p <- p + geom_text_repel(
                             data = filter(c.long, 
                             Beta == colnames(c.dat)[2]),
@@ -154,7 +154,7 @@ format:
         breaks =  unique(c.long$Beta)[seq(1, 21, by = 2)],
         labels = sprintf("%.2f", seq(0, 1, by = 0.05))[seq(1, 21, by = 2)]
         )
-    p <- p + theme(text = element_text(size = 20)) + xlab("Beta Value")
+    p <- p + theme(text = element_text(size = 24)) + xlab("Beta Value")
     p
     ggsave(here("bump.png"), height = 10, width = 15)
 ```
