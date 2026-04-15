@@ -144,7 +144,7 @@ format:
         breaks =  unique(c.long$Beta)[seq(1, 21, by = 2)],
         labels = sprintf("%.2f", seq(0, 1, by = 0.05))[seq(1, 21, by = 2)]
         )
-    p <- p + xlab("Beta") + ylab("")
+    p <- p + xlab("Beta") + ylab("Eigenvector Score")
     p
     ggsave(here("bump.png"), height = 10, width = 15)
 ```
