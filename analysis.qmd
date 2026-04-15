@@ -121,13 +121,13 @@ format:
                             data = filter(c.long, 
                             Beta == colnames(c.dat)[1]),
                             aes(x = Beta, label = family), 
-                            size = 6, nudge_x = -5
+                            size = 6, nudge_x = -3.5
                             )
     p <- p + geom_text_repel(
                             data = filter(c.long, 
                             Beta == colnames(c.dat)[ncol(c.dat)-1]),
                             aes(x = Beta, label = family), 
-                            size = 6, nudge_x = 5
+                            size = 6, nudge_x = 3.5
                             )
     p <- p + theme_minimal()
     p <- p + labs(x = "")
