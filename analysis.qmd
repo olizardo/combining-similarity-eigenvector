@@ -37,7 +37,7 @@ format:
     png("medici.png", width = 800, height = 600)
     plot(g, 
         vertex.size=10, vertex.frame.color="lightgray", 
-        vertex.label.dist=2, 
+        vertex.label.dist=2, layout = layout_nicely,
         vertex.label.cex = 1.2, edge.color = "gray",
         edge.width = 2)
     dev.off()
@@ -100,39 +100,34 @@ format:
 
 ## Parameter Range Sensitivity Analysis
 
-```{r}
+```{r Bump Chart}    
     beta.range <- seq(0, 1, by = 0.05)
-    prestige.sim.vec(list(g), a = 1-beta.range, b = beta.range)
-    c.dat <- data.frame(c)
-    names(c.dat) <- sprintf("%.2f", seq(0, 1, by = 0.05))
-    c.dat <- data.frame(person = rownames(c), c.dat)
+    c.dat <- data.frame(prestige.sim.vec(list(g), a = 1-beta.range, b = beta.range)) |> 
+        mutate(family = V(g)$name)
+    names(c.dat)[1:ncol(c.dat)-1] <- paste("b", sprintf("%.2f", seq(0, 1, by = 0.05)), sep = "_")
     c.long <-  c.dat %>% 
          pivot_longer(
-            cols = !person,
+            cols = !family,
             names_to = "Beta",
             values_to = "value"
           ) |> 
-        mutate(Beta = factor(Beta, ordered = TRUE, levels = colnames(c.dat)[-1])) 
-    head(c.long)
-```
-
-```{r Bump Chart}
+        mutate(Beta = factor(Beta, ordered = TRUE, levels = colnames(c.dat[-ncol(c.dat)]))) 
     p <- ggplot(data = c.long, mapping = aes(x = Beta, y = value, 
-    color = person, group = person))
+    color = family, group = family))
     p <- p + geom_vline(aes(xintercept = which(sprintf("%.2f", seq(0, 1, by = 0.05)) == "0.85")), linetype = 2, color = "red")
     p <- p + geom_bump(linewidth = 0.8, smooth = 2)
     p <- p + geom_point(size = 3)
     p <- p + geom_text_repel(
                             data = filter(c.long, 
-                            Beta == colnames(c.dat)[2]),
-                            aes(x = Beta, label = person), 
-                            size = 6, nudge_x = -2.5
+                            Beta == colnames(c.dat)[1]),
+                            aes(x = Beta, label = family), 
+                            size = 6, nudge_x = -5
                             )
     p <- p + geom_text_repel(
                             data = filter(c.long, 
-                            Beta == colnames(c.dat)[ncol(c.dat)]),
-                            aes(x = Beta, label = person), 
-                            size = 6, nudge_x = 2.5
+                            Beta == colnames(c.dat)[ncol(c.dat)-1]),
+                            aes(x = Beta, label = family), 
+                            size = 6, nudge_x = 5
                             )
     p <- p + theme_minimal()
     p <- p + labs(x = "")
