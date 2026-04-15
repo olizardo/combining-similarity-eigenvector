@@ -76,7 +76,7 @@ format:
     eig.dat <- data.frame(sort.vec(bon), sort.vec(ace), sort.vec(ol1), sort.vec(ol2))
 ```
 
-```{r saving html table}
+<!-- ```{r saving html table}
     kbl(eig.dat,
         format = "html",
         row.names = FALSE, align = rep(c("l", "c"), 4),
@@ -84,7 +84,7 @@ format:
         caption = "Eigenvector-Based Scores for the Medici Network.", label = "tab:main") %>%    
         kable_styling(bootstrap_options = 
                     c("hover", "condensed", "responsive"))
-```
+``` -->
 
 ```{r saving latex table}
     save_kable(
@@ -101,46 +101,50 @@ format:
 ## Parameter Range Sensitivity Analysis
 
 ```{r Bump Chart}    
-    beta.range <- seq(0, 1, by = 0.05)
+    beta.range <- seq(0, 1, by = 0.05) #sequence of beta values
     c.dat <- data.frame(prestige.sim.vec(list(g), a = 1-beta.range, b = beta.range)) |> 
-        mutate(family = V(g)$name)
-    names(c.dat)[1:ncol(c.dat)-1] <- paste("b", sprintf("%.2f", seq(0, 1, by = 0.05)), sep = "_")
+        mutate(family = V(g)$name) #creating data frame from vectorized functionn
+    names(c.dat)[1:ncol(c.dat)-1] <- paste("b", sprintf("%.2f", seq(0, 1, by = 0.05)), sep = "_") #naming columns
     c.long <-  c.dat %>% 
          pivot_longer(
             cols = !family,
             names_to = "Beta",
             values_to = "value"
           ) |> 
-        mutate(Beta = factor(Beta, ordered = TRUE, levels = colnames(c.dat[-ncol(c.dat)]))) 
-    p <- ggplot(data = c.long, mapping = aes(x = Beta, y = value, 
-    color = family, group = family))
-    p <- p + geom_vline(aes(xintercept = which(sprintf("%.2f", seq(0, 1, by = 0.05)) == "0.85")), linetype = 2, color = "red")
+        mutate(Beta = factor(Beta, ordered = TRUE, levels = colnames(c.dat[-ncol(c.dat)]))) #creating long data frame
+    ## plotting
+    p <- ggplot(
+        data = c.long, 
+        mapping = aes(x = Beta, y = value, color = family, group = family)
+        )
+    p <- p + geom_vline(
+        aes(xintercept = which(sprintf("%.2f", seq(0, 1, by = 0.05)) == "0.85")), 
+        linetype = 2, color = "red"
+        )
     p <- p + geom_bump(linewidth = 0.8, smooth = 2)
     p <- p + geom_point(size = 3)
     p <- p + geom_text_repel(
-                            data = filter(c.long, 
-                            Beta == colnames(c.dat)[1]),
-                            aes(x = Beta, label = family), 
-                            size = 6, nudge_x = -3.5
-                            )
+        data = filter(c.long, 
+        Beta == colnames(c.dat)[1]),
+        aes(x = Beta, label = family), 
+        size = 6, nudge_x = -3.5
+        ) #left labels
     p <- p + geom_text_repel(
-                            data = filter(c.long, 
-                            Beta == colnames(c.dat)[ncol(c.dat)-1]),
-                            aes(x = Beta, label = family), 
-                            size = 6, nudge_x = 3.5
-                            )
+        data = filter(c.long, 
+        Beta == colnames(c.dat)[ncol(c.dat)-1]),
+        aes(x = Beta, label = family), 
+        size = 6, nudge_x = 3.5
+        ) #right labels
     p <- p + theme_minimal()
-    p <- p + labs(x = "")
-    p <- p + theme(legend.position = "none",
-        panel.grid.major = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank(),
+    p <- p + theme(
+        legend.position = "none",
+        text = element_text(size = 24)
         )
     p <- p + scale_x_discrete(
         breaks =  unique(c.long$Beta)[seq(1, 21, by = 2)],
         labels = sprintf("%.2f", seq(0, 1, by = 0.05))[seq(1, 21, by = 2)]
         )
-    p <- p + theme(text = element_text(size = 24)) + xlab("Beta")
+    p <- p + xlab("Beta") + ylab("")
     p
     ggsave(here("bump.png"), height = 10, width = 15)
 ```
