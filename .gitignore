@@ -1,0 +1,26 @@
+# R specific files
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+
+# Quarto specific files
+.quarto/
+analysis_files/
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.run.xml
+*-blx.bib
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+
+# OS specific files
+.DS_Store
+Thumbs.db
