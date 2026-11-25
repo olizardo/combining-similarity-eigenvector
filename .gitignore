@@ -1,32 +1,36 @@
-# R specific files
+# R files
+.Rproj.user
 .Rhistory
 .RData
 .Ruserdata
-.Rproj.user/
 
-# Quarto specific files
+# Quarto and RMarkdown
 .quarto/
-analysis_files/
+*_files/
+*_cache/
+site_libs/
+*.html
 
-# LaTeX build artifacts
+# Posit Assistant
+.posit/
+
+# LaTeX compilation artifacts
 *.aux
-*.bbl
-*.blg
 *.log
 *.out
 *.toc
-*.run.xml
-*-blx.bib
+*.lof
+*.lot
+*.bbl
+*.blg
+*.pdf
 *.synctex.gz
 *.fdb_latexmk
 *.fls
+*.run.xml
+-blx.bib
+*-blx.bib
 
-# OS specific files
-.DS_Store
-Thumbs.db
-
-# Publisher galley proofs (local only)
-CONNECTIONS-*.pdf
-
-# Positron assistant files
-.posit/
+# Manuscript, proofs, and revision materials (kept locally in manuscript/, not in repo)
+manuscript/
+*.tex.bak
