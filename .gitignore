@@ -24,3 +24,9 @@ analysis_files/
 # OS specific files
 .DS_Store
 Thumbs.db
+
+# Publisher galley proofs (local only)
+CONNECTIONS-*.pdf
+
+# Positron assistant files
+.posit/
